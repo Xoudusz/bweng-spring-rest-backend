@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.service
 
+import at.technikum.springrestbackend.dto.PostCreateDTO
 import at.technikum.springrestbackend.dto.PostUpdateDTO
 import at.technikum.springrestbackend.entity.Post
 import at.technikum.springrestbackend.exception.PostNotFoundException
@@ -9,7 +10,7 @@ import at.technikum.springrestbackend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Service
 class PostServiceImpl @Autowired constructor(
@@ -18,11 +19,15 @@ class PostServiceImpl @Autowired constructor(
 ) : PostService {
 
     @Transactional
-    override fun createPost(post: Post): Post {
-        val userExists = userRepository.existsById(post.userId)
+    override fun createPost(postCreateDTO: PostCreateDTO): Post {
+        val userExists = userRepository.existsById(postCreateDTO.userId)
         if (!userExists) {
-            throw UserNotFoundException("User with ID ${post.userId} not found")
+            throw UserNotFoundException("User with ID ${postCreateDTO.userId} not found")
         }
+        val post = Post(
+            userId = postCreateDTO.userId,
+            content = postCreateDTO.content
+        )
         return postRepository.save(post)
     }
 
@@ -44,12 +49,11 @@ class PostServiceImpl @Autowired constructor(
     }
 
     @Transactional
-    override fun deletePost(id: UUID): Boolean {
+    override fun deletePost(id: UUID) {
         if (!postRepository.existsById(id)) {
             throw PostNotFoundException("Post with ID $id not found")
         }
         postRepository.deleteById(id)
-        return true
     }
 
     override fun getPostsByUser(userId: UUID): List<Post> {

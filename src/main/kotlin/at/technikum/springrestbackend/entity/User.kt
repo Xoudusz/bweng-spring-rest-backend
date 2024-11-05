@@ -11,8 +11,10 @@ data class User(
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: UUID = UUID.randomUUID(),
 
+    @Column(unique = true)
     val username: String,
 
+    @Column(unique = true)
     val email: String,
 
     val passwordHash: String,

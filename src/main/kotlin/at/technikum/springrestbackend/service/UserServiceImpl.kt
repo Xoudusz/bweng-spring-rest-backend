@@ -1,11 +1,13 @@
 package at.technikum.springrestbackend.service
 
+import at.technikum.springrestbackend.dto.UserDTO
 import at.technikum.springrestbackend.entity.User
+import at.technikum.springrestbackend.exception.UserNotFoundException
 import at.technikum.springrestbackend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.UUID
+import java.util.*
 
 @Service
 class UserServiceImpl @Autowired constructor(
@@ -13,15 +15,25 @@ class UserServiceImpl @Autowired constructor(
 ) : UserService {
 
     @Transactional
-    override fun createUser(user: User): User {
-        if (userRepository.findByUsername(user.username) != null || userRepository.findByEmail(user.email) != null) {
-            throw IllegalArgumentException("Username or email already in use.")
+    override fun createUser(userDTO: UserDTO): User {
+        if (userRepository.findByUsername(userDTO.username) != null) {
+            throw IllegalArgumentException("Username '${userDTO.username}' is already in use.")
         }
+        if (userRepository.findByEmail(userDTO.email) != null) {
+            throw IllegalArgumentException("Email '${userDTO.email}' is already in use.")
+        }
+
+        val user = User(
+            username = userDTO.username, email = userDTO.email, passwordHash = userDTO.passwordHash
+        )
         return userRepository.save(user)
     }
 
-    override fun getUserById(id: UUID): User? {
-        return userRepository.findById(id).orElse(null)
+    override fun getUserById(id: UUID): User {
+        if (!userRepository.existsById(id)) {
+            throw UserNotFoundException("User with ID $id not found")
+        }
+        return userRepository.findById(id).get()
     }
 
     override fun getAllUsers(): List<User> {
@@ -29,32 +41,33 @@ class UserServiceImpl @Autowired constructor(
     }
 
     @Transactional
-    override fun updateUser(id: UUID, user: User): User? {
-        return if (userRepository.existsById(id)) {
-            user.id = id
-            userRepository.save(user)
-        } else {
-            null
+    override fun updateUser(id: UUID, userDTO: UserDTO): User {
+        val existingUser = userRepository.findById(id).orElseThrow {
+            UserNotFoundException("User with ID $id not found")
         }
+        return existingUser.copy(
+            username = userDTO.username, email = userDTO.email, passwordHash = userDTO.passwordHash
+        ).also { userRepository.save(it) }
     }
 
     @Transactional
-    override fun deleteUser(id: UUID): Boolean {
-        return if (userRepository.existsById(id)) {
-            userRepository.deleteById(id)
-            true
-        } else {
-            false
+    override fun deleteUser(id: UUID) {
+        if (!userRepository.existsById(id)) {
+            throw UserNotFoundException("User with ID $id not found")
         }
+        userRepository.deleteById(id)
     }
 
     @Transactional(readOnly = true)
-    override fun findByEmail(email: String): User? {
-        return userRepository.findByEmail(email)
+    override fun findByEmail(email: String): User {
+        val user = userRepository.findByEmail(email) ?: throw UserNotFoundException("User with email $email not found")
+        return user
     }
 
     @Transactional(readOnly = true)
-    override fun findByUsername(username: String): User? {
-        return userRepository.findByUsername(username)
+    override fun findByUsername(username: String): User {
+        val user = userRepository.findByUsername(username)
+            ?: throw UserNotFoundException("User with username $username not found")
+        return user
     }
 }

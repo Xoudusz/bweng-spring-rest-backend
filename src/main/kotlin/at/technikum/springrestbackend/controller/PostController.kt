@@ -25,8 +25,7 @@ class PostController(
 
     @PostMapping
     fun createPost(@RequestBody @Valid postCreateDTO: PostCreateDTO): ResponseEntity<Post> {
-        val post = Post(userId = postCreateDTO.userId, content = postCreateDTO.content)
-        return ResponseEntity(postServiceImpl.createPost(post), HttpStatus.CREATED)
+        return ResponseEntity(postServiceImpl.createPost(postCreateDTO), HttpStatus.CREATED)
     }
 
     @GetMapping
