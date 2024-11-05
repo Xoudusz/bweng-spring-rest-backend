@@ -14,8 +14,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleIllegalArgument(
-        ex: IllegalArgumentException,
-        request: HttpServletRequest
+        ex: IllegalArgumentException, request: HttpServletRequest
     ): ResponseEntity<ErrorResponse> {
         val errorResponse = ErrorResponse(
             status = HttpStatus.BAD_REQUEST.value(),
@@ -28,13 +27,11 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidationExceptions(
-        ex: MethodArgumentNotValidException,
-        request: HttpServletRequest
+        ex: MethodArgumentNotValidException, request: HttpServletRequest
     ): ResponseEntity<ValidationErrorResponse> {
         val errors = ex.bindingResult.fieldErrors.map { fieldError ->
             ValidationError(
-                field = fieldError.field,
-                message = fieldError.defaultMessage ?: "Invalid value"
+                field = fieldError.field, message = fieldError.defaultMessage ?: "Invalid value"
             )
         }
 
@@ -50,5 +47,30 @@ class GlobalExceptionHandler {
     }
 
 
+    @ExceptionHandler(UserNotFoundException::class)
+    fun handleUserNotFound(
+        ex: UserNotFoundException, request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        val errorResponse = ErrorResponse(
+            status = HttpStatus.NOT_FOUND.value(),
+            error = "User Not Found",
+            message = ex.message ?: "The specified user was not found.",
+            path = request.requestURI
+        )
+        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+    }
+
+    @ExceptionHandler(PostNotFoundException::class)
+    fun handlePostNotFound(
+        ex: PostNotFoundException, request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        val errorResponse = ErrorResponse(
+            status = HttpStatus.NOT_FOUND.value(),
+            error = "Post Not Found",
+            message = ex.message ?: "The specified post was not found.",
+            path = request.requestURI
+        )
+        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+    }
 
 }

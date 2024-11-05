@@ -2,14 +2,15 @@ package at.technikum.springrestbackend.dto
 
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import org.jetbrains.annotations.NotNull
 import java.util.*
 
 data class PostCreateDTO(
-    @NotBlank(message = "Content is required")
-    @Size(max = 280, message = "Content must not exceed 280 characters")
+    @field:NotBlank(message = "Content is required")
+    @field:Size(max = 500, message = "Content must not exceed 500 characters")
     val content: String,
 
-    @NotBlank(message = "Author is required")
+    @field:NotNull
     val userId: UUID
 
 )

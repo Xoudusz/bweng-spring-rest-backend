@@ -13,6 +13,7 @@ data class Post(
     @JoinColumn(name = "user_Id", nullable = false)
     val userId: UUID,
 
+    @Column(length = 500)
     val content: String,
 
     val createdAt: LocalDateTime = LocalDateTime.now()
