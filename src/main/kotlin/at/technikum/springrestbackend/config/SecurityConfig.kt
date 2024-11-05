@@ -31,8 +31,10 @@ class SecurityConfig {
         http
             .authorizeHttpRequests { authz ->
                 authz
-                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/api/**").hasRole("USER")
-                    .anyRequest().permitAll()
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                    .requestMatchers("/api/users/**").hasRole("USER")
+                    .requestMatchers("/api/admin/**").hasRole("ADMIN") // Example for admin routes
+                    .anyRequest().authenticated()
             }
             .addFilterBefore(JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter::class.java)
             .formLogin(Customizer.withDefaults())
