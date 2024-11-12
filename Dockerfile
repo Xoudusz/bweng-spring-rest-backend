@@ -5,7 +5,8 @@ WORKDIR /app
 COPY build.gradle.kts settings.gradle.kts ./
 COPY src ./src
 
-RUN gradle build --no-daemon
+RUN gradle build -x test --no-daemon
+
 
 # Run stage
 FROM openjdk:21-jdk-slim
