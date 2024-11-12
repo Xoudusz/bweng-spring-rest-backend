@@ -1,5 +1,9 @@
 package at.technikum.springrestbackend.exception
 
+import at.technikum.springrestbackend.exception.notFound.FollowNotFoundException
+import at.technikum.springrestbackend.exception.notFound.NotificationNotFoundException
+import at.technikum.springrestbackend.exception.notFound.PostNotFoundException
+import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -86,4 +90,16 @@ class GlobalExceptionHandler {
         return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
 
+    @ExceptionHandler(NotificationNotFoundException::class)
+    fun handleNotificationNotFound(
+        ex: NotificationNotFoundException, request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        val errorResponse = ErrorResponse(
+            status = HttpStatus.NOT_FOUND.value(),
+            error = "Notification Not Found",
+            message = ex.message ?: "The specified notification was not found.",
+            path = request.requestURI
+        )
+        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+    }
 }

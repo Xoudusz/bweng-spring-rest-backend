@@ -4,8 +4,8 @@ import at.technikum.springrestbackend.dto.NotificationCreateDTO
 import at.technikum.springrestbackend.dto.NotificationUpdateDTO
 import at.technikum.springrestbackend.entity.Notification
 import at.technikum.springrestbackend.entity.enums.NotificationType
-import at.technikum.springrestbackend.exception.*
-// import at.technikum.springrestbackend.exception.FollowNotFoundException
+import at.technikum.springrestbackend.exception.notFound.*
+// import at.technikum.springrestbackend.exception.notFound.FollowNotFoundException
 import at.technikum.springrestbackend.repository.*
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -18,7 +18,7 @@ class NotificationServiceImpl @Autowired constructor(
     private val commentRepository: CommentRepository,
     private val likeRepository: LikeRepository,
     private val notificationRepository: NotificationRepository,
-    // private val followRepository: FollowRepository
+    private val followRepository: FollowRepository
 ) : NotificationService {
     override fun getAllNotifications(): List<Notification> {
         return notificationRepository.findAll()
@@ -58,7 +58,12 @@ class NotificationServiceImpl @Autowired constructor(
                 notification.copy(entityId = entityId)
             }
 
-            NotificationType.FOLLOW -> notification
+            NotificationType.FOLLOW -> {
+                if (!followRepository.existsById(entityId)) {
+                    throw FollowNotFoundException("Follow with ID $entityId not found")
+                }
+                notification.copy(entityId = entityId)
+            }
         }
 
         return notificationRepository.save(updatedNotification)
