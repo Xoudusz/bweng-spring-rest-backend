@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.entity
 
+import at.technikum.springrestbackend.entity.enums.NotificationType
 import jakarta.persistence.*
 import java.time.LocalDateTime
 import java.util.*
@@ -14,7 +15,10 @@ data class Notification(
     @JoinColumn(name = "user_id", nullable = false)
     val userId: UUID,
 
-    val type: String,
+    @JoinColumn(name = "entity_id", nullable = false)
+    val entityId: UUID? = null,
+
+    val type: NotificationType,
 
     @Column(length = 65)
     var content: String,

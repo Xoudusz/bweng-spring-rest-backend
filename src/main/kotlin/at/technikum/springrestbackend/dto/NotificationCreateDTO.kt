@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.dto
 
+import at.technikum.springrestbackend.entity.enums.NotificationType
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.jetbrains.annotations.NotNull
@@ -14,14 +15,8 @@ data class NotificationCreateDTO(
     val content: String,
 
     @field:NotBlank(message = "Type is required")
-    val type: String,
+    val type: NotificationType,
 
-    val postId: UUID,
-
-    val commentId: UUID,
-
-    val likeId: UUID,
-
-    val followId: UUID
-
+    @field:NotNull
+    val entityId: UUID
 )

@@ -14,8 +14,7 @@ interface NotificationService {
     fun deleteNotifications(userId: UUID)
     fun getNotifications(userId: UUID): List<Notification>
     fun getNotification(notificationId: UUID): Notification
-    fun updateNotification(notificationId: UUID, content: String): Notification
-    fun markNotificationAsRead(notificationId: UUID, notificationUpdateDTO: NotificationUpdateDTO): Notification
+    fun updateNotification(notificationId: UUID, notificationUpdateDTO: NotificationUpdateDTO): Notification
     fun getUnreadNotifications(userId: UUID): List<Notification>
     fun getUnreadNotificationCount(userId: UUID): Int
     fun getNotificationCount(userId: UUID): Int
