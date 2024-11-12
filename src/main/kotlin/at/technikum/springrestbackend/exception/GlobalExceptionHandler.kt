@@ -73,4 +73,17 @@ class GlobalExceptionHandler {
         return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
 
+    @ExceptionHandler(FollowNotFoundException::class)
+    fun followPostNotFound(
+        ex: FollowNotFoundException, request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        val errorResponse = ErrorResponse(
+            status = HttpStatus.NOT_FOUND.value(),
+            error = "Follower Not Found",
+            message = ex.message ?: "The specified follower was not found.",
+            path = request.requestURI
+        )
+        return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
+    }
+
 }
