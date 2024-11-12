@@ -2,7 +2,7 @@ package at.technikum.springrestbackend.service
 
 import at.technikum.springrestbackend.dto.UserDTO
 import at.technikum.springrestbackend.entity.User
-import at.technikum.springrestbackend.exception.UserNotFoundException
+import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
 import at.technikum.springrestbackend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

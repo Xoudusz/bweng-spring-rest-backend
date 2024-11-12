@@ -2,9 +2,8 @@ package at.technikum.springrestbackend.service
 
 import at.technikum.springrestbackend.dto.CommentCreateDTO
 import at.technikum.springrestbackend.entity.Comment
-import at.technikum.springrestbackend.entity.Like
-import at.technikum.springrestbackend.exception.PostNotFoundException
-import at.technikum.springrestbackend.exception.UserNotFoundException
+import at.technikum.springrestbackend.exception.notFound.PostNotFoundException
+import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
 import at.technikum.springrestbackend.repository.CommentRepository
 import at.technikum.springrestbackend.repository.PostRepository
 import at.technikum.springrestbackend.repository.UserRepository

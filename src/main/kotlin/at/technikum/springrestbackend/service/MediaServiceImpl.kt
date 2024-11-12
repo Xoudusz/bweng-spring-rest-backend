@@ -2,7 +2,7 @@ package at.technikum.springrestbackend.service
 
 import at.technikum.springrestbackend.dto.MediaDTO
 import at.technikum.springrestbackend.entity.Media
-import at.technikum.springrestbackend.exception.PostNotFoundException
+import at.technikum.springrestbackend.exception.notFound.PostNotFoundException
 import at.technikum.springrestbackend.repository.MediaRepository
 import at.technikum.springrestbackend.repository.PostRepository
 import org.springframework.stereotype.Service

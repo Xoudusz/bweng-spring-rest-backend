@@ -3,8 +3,8 @@ package at.technikum.springrestbackend.service
 import at.technikum.springrestbackend.dto.PostCreateDTO
 import at.technikum.springrestbackend.dto.PostUpdateDTO
 import at.technikum.springrestbackend.entity.Post
-import at.technikum.springrestbackend.exception.PostNotFoundException
-import at.technikum.springrestbackend.exception.UserNotFoundException
+import at.technikum.springrestbackend.exception.notFound.PostNotFoundException
+import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
 import at.technikum.springrestbackend.repository.PostRepository
 import at.technikum.springrestbackend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired

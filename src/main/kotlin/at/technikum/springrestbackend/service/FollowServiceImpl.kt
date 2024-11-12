@@ -2,8 +2,8 @@ package at.technikum.springrestbackend.service
 
 import at.technikum.springrestbackend.dto.FollowDTO
 import at.technikum.springrestbackend.entity.Follow
-import at.technikum.springrestbackend.exception.FollowNotFoundException
-import at.technikum.springrestbackend.exception.UserNotFoundException
+import at.technikum.springrestbackend.exception.notFound.FollowNotFoundException
+import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
 import at.technikum.springrestbackend.repository.FollowRepository
 import at.technikum.springrestbackend.repository.UserRepository
 import org.springframework.stereotype.Service
