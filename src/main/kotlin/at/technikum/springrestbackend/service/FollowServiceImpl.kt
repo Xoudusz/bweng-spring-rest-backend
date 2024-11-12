@@ -2,6 +2,7 @@ package at.technikum.springrestbackend.service
 
 import at.technikum.springrestbackend.dto.FollowDTO
 import at.technikum.springrestbackend.entity.Follow
+import at.technikum.springrestbackend.exception.FollowNotFoundException
 import at.technikum.springrestbackend.exception.UserNotFoundException
 import at.technikum.springrestbackend.repository.FollowRepository
 import at.technikum.springrestbackend.repository.UserRepository
@@ -22,15 +23,24 @@ class FollowServiceImpl(
             UserNotFoundException("Following user with id $followingId not found")
         }
 
-        val follow = Follow(follower = follower, following = following)
-        return followRepository.save(follow)
+        return followRepository.save(Follow(follower = follower, following = following))
     }
 
 
     override fun unfollowUser(followerId: UUID, followingId: UUID) {
+        userRepository.findById(followerId).orElseThrow {
+            UserNotFoundException("Follower with id $followerId not found")
+        }
+
+        userRepository.findById(followingId).orElseThrow {
+            UserNotFoundException("Following user with id $followingId not found")
+        }
+
         val follow = followRepository.findByFollowerId(followerId)
             .find { it.following.id == followingId }
-        follow?.let { followRepository.delete(it) }
+            ?: throw FollowNotFoundException("Follow relationship between $followerId and $followingId not found")
+
+        followRepository.delete(follow)
     }
 
     override fun getFollowers(userId: UUID): List<FollowDTO> {

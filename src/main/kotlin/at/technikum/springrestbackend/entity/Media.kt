@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.entity
 
+import at.technikum.springrestbackend.entity.enums.MediaType
 import jakarta.persistence.*
 import java.time.LocalDateTime
 import java.util.UUID
@@ -19,8 +20,9 @@ data class Media(
     @Column(nullable = false)
     val url: String,
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val type: String, // e.g., "image" or "video"
+    val type: MediaType,
 
     @Column(name = "created_at", nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now()

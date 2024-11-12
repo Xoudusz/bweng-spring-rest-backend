@@ -28,8 +28,8 @@ class MediaServiceImpl(
     }
 
     override fun getMediaByPost(postId: UUID): List<MediaDTO> {
-        return mediaRepository.findByPostId(postId).map {
-            MediaDTO(it.post.id, it.url, it.type)
+        return mediaRepository.findByPostId(postId).map { media ->
+            MediaDTO(media.post.id, media.url, media.type)
         }
     }
 }
