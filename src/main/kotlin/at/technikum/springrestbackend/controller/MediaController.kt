@@ -16,4 +16,7 @@ class MediaController(
 
     @GetMapping("/post/{postId}")
     fun getMediaByPost(@PathVariable postId: UUID) = mediaService.getMediaByPost(postId)
+
+    @DeleteMapping("/post/{postId}")
+    fun deleteMediaFromPost(@PathVariable postId: UUID) = mediaService.deleteMediaFromPost(postId)
 }

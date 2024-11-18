@@ -102,4 +102,20 @@ class GlobalExceptionHandler {
         )
         return ResponseEntity(errorResponse, HttpStatus.NOT_FOUND)
     }
+
+    @ExceptionHandler(IllegalStateException::class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    fun handleIllegalStateException(
+        ex: IllegalStateException,
+        request: HttpServletRequest
+        ): ResponseEntity<ErrorResponse>{
+        val errorResponse = ErrorResponse(
+            status = HttpStatus.CONFLICT.value(),
+            error = "Conflict",
+            message = ex.message ?: "An unexpected state occurred",
+            path = request.requestURI
+        )
+        return ResponseEntity(errorResponse, HttpStatus.CONFLICT)
+    }
+
 }

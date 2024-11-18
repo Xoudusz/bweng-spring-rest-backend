@@ -6,6 +6,7 @@ import at.technikum.springrestbackend.exception.notFound.PostNotFoundException
 import at.technikum.springrestbackend.repository.MediaRepository
 import at.technikum.springrestbackend.repository.PostRepository
 import org.springframework.stereotype.Service
+import java.lang.IllegalStateException
 import java.util.UUID
 
 @Service
@@ -31,5 +32,18 @@ class MediaServiceImpl(
         return mediaRepository.findByPostId(postId).map { media ->
             MediaDTO(media.post.id, media.url, media.type)
         }
+    }
+
+    override fun deleteMediaFromPost(postId: UUID) {
+        postRepository.findById(postId).orElseThrow() {
+            PostNotFoundException("Post with Id: $postId not found")
+        }
+            val mediaList = mediaRepository.findByPostId(postId)
+            if (mediaList.isEmpty()){
+                throw IllegalStateException("Media not found for post with Id: $postId")
+            }
+
+        mediaRepository.deleteAll(mediaList)
+
     }
 }

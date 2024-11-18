@@ -7,4 +7,5 @@ import java.util.UUID
 interface MediaService {
     fun addMediaToPost(mediaDTO: MediaDTO): Media
     fun getMediaByPost(postId: UUID): List<MediaDTO>
+    fun deleteMediaFromPost(postId: UUID)
 }
