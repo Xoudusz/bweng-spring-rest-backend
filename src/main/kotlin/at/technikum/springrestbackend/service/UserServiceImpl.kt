@@ -5,13 +5,15 @@ import at.technikum.springrestbackend.entity.User
 import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
 import at.technikum.springrestbackend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Service
 class UserServiceImpl @Autowired constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val passwordEncoder: PasswordEncoder
 ) : UserService {
 
     @Transactional
@@ -24,7 +26,7 @@ class UserServiceImpl @Autowired constructor(
         }
 
         val user = User(
-            username = userDTO.username, email = userDTO.email, passwordHash = userDTO.passwordHash
+            username = userDTO.username, email = userDTO.email, password = passwordEncoder.encode(userDTO.password), role = userDTO.role
         )
         return userRepository.save(user)
     }
@@ -46,7 +48,7 @@ class UserServiceImpl @Autowired constructor(
             UserNotFoundException("User with ID $id not found")
         }
         return existingUser.copy(
-            username = userDTO.username, email = userDTO.email, passwordHash = userDTO.passwordHash
+            username = userDTO.username, email = userDTO.email, password = userDTO.password, role = userDTO.role
         ).also { userRepository.save(it) }
     }
 

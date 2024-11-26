@@ -1,8 +1,13 @@
 springdoc:
   api-docs:
-    path: /api
+    path: /v3/api-docs
   swagger-ui:
     path: /swagger.html
+
+jwt:
+  secret: averygoodsecretnoonewilleverguessinamillionyears
+  accessTokenExpiration: 600000
+  refreshTokenExpiration: 3600000
 
 spring:
   application:

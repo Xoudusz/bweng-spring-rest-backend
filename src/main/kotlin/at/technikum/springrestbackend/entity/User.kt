@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.entity
 
+import at.technikum.springrestbackend.entity.enums.Role
 import jakarta.persistence.*
 import java.time.LocalDateTime
 import java.util.*
@@ -17,7 +18,9 @@ data class User(
     @Column(unique = true)
     val email: String,
 
-    val passwordHash: String,
+    val password: String,
+
+    val role: Role,
 
     val createdAt: LocalDateTime = LocalDateTime.now()
 )
