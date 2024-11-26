@@ -19,17 +19,32 @@ class AuthenticationService(
     private val tokenService: TokenService,
     private val refreshTokenRepository: RefreshTokenRepository,
     @Value("\${jwt.accessTokenExpiration}") private val accessTokenExpiration: Long = 0,
-    @Value("\${jwt.refreshTokenExpiration}") private val refreshTokenExpiration: Long = 0
+    @Value("\${jwt.refreshTokenExpiration}") private val refreshTokenExpiration: Long = 0,
+    private val userService: UserService
 ) {
     fun authentication(authenticationRequest: AuthenticationRequest): AuthenticationResponse {
-        authManager.authenticate(
+        // Determine if identifier is an email or username
+        val foundUser = when {
+            authenticationRequest.identifier.contains("@") -> {
+                userService.findByEmail(authenticationRequest.identifier)
+            }
+            else -> {
+                userService.findByUsername(authenticationRequest.identifier)
+            }
+        }
+
+        if (foundUser == null) {
+            throw AuthenticationServiceException("User with identifier ${authenticationRequest.identifier} not found")
+        }
+
+       authManager.authenticate(
             UsernamePasswordAuthenticationToken(
-                authenticationRequest.username,
+                foundUser.username,
                 authenticationRequest.password
             )
         )
 
-        val user = userDetailsService.loadUserByUsername(authenticationRequest.username)
+        val user = userDetailsService.loadUserByUsername(foundUser.username)
 
         val accessToken = createAccessToken(user)
         val refreshToken = createRefreshToken(user)

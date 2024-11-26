@@ -1,7 +1,7 @@
 package at.technikum.springrestbackend.entity
 
 data class AuthenticationRequest(
-    val username: String,
+    val identifier: String,
     val password: String,
 )
 

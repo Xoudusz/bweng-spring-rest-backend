@@ -48,7 +48,7 @@ class UserServiceImpl @Autowired constructor(
             UserNotFoundException("User with ID $id not found")
         }
         return existingUser.copy(
-            username = userDTO.username, email = userDTO.email, password = userDTO.password, role = userDTO.role
+            username = userDTO.username, email = userDTO.email, password = passwordEncoder.encode(userDTO.password), role = userDTO.role
         ).also { userRepository.save(it) }
     }
 
