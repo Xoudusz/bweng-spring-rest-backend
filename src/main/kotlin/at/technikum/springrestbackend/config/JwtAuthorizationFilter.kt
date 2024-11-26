@@ -23,38 +23,42 @@ class JwtAuthorizationFilter(
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
-        val authorizationHeader: String? = request.getHeader("Authorization")
+        val jwtCookie = request.cookies?.find { it.name == "JWT" }
+        val token = jwtCookie?.value ?: request.getHeader("Authorization")?.substringAfter("Bearer ")
 
-        if (null != authorizationHeader && authorizationHeader.startsWith("Bearer ")) {
+        if (token != null) {
             try {
-                val token: String = authorizationHeader.substringAfter("Bearer ")
                 val username: String = tokenService.extractUsername(token)
 
                 if (SecurityContextHolder.getContext().authentication == null) {
                     val userDetails: UserDetails = userDetailsService.loadUserByUsername(username)
 
-                    if (username == userDetails.username) {
+                    if (tokenService.validateToken(token) && username == userDetails.username) {
                         val authToken = UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.authorities
                         )
                         authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
                         SecurityContextHolder.getContext().authentication = authToken
 
-                        // Set the JWT token as an HttpOnly cookie
-                        val cookie = Cookie("JWT", token)
-                        cookie.isHttpOnly = true
-                        cookie.path = "/"
+                        // Set the JWT token as an HttpOnly and Secure cookie
+                        val cookie = Cookie("JWT", token).apply {
+                            isHttpOnly = true
+                            // isSecure = true // only used in HTTPS environments
+                            path = "/"
+                        }
                         response.addCookie(cookie)
                     }
                 }
             } catch (ex: Exception) {
                 response.writer.write(
                     """{"error": "Filter Authorization error:
-                    |${ex.message ?: "unknown error"}"}""".trimMargin()
+                |${ex.message ?: "unknown error"}"}""".trimMargin()
                 )
             }
         }
 
         filterChain.doFilter(request, response)
     }
+
+
 }
