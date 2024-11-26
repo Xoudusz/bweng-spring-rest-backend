@@ -13,4 +13,8 @@ class RefreshTokenRepository {
     fun save(token: String, userDetails: UserDetails) {
         tokens[token] = userDetails
     }
+
+    fun deleteByToken(token: String) {
+        tokens.remove(token)
+    }
 }
