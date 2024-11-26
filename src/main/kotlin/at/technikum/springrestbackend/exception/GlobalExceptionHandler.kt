@@ -4,6 +4,7 @@ import at.technikum.springrestbackend.exception.notFound.FollowNotFoundException
 import at.technikum.springrestbackend.exception.notFound.NotificationNotFoundException
 import at.technikum.springrestbackend.exception.notFound.PostNotFoundException
 import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
+import io.jsonwebtoken.ExpiredJwtException
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -11,9 +12,18 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
+import java.security.SignatureException
+import javax.naming.AuthenticationException
 
 @ControllerAdvice
 class GlobalExceptionHandler {
+
+    @ExceptionHandler(value = [ExpiredJwtException::class, AuthenticationException::class, SignatureException::class])
+    fun handleAuthenticationExceptions(ex: RuntimeException): ResponseEntity<String> {
+        return ResponseEntity
+            .status(HttpStatus.UNAUTHORIZED)
+            .body("Authentication failed: ${ex.message}")
+    }
 
     @ExceptionHandler(IllegalArgumentException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

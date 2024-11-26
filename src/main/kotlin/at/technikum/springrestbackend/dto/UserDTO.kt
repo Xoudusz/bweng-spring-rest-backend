@@ -1,5 +1,7 @@
 package at.technikum.springrestbackend.dto
 
+import at.technikum.springrestbackend.dto.validation.ValidRole
+import at.technikum.springrestbackend.entity.enums.Role
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
@@ -22,5 +24,8 @@ data class UserDTO(
         regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}",
         message = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character"
     )
-    val passwordHash: String
+    val password: String,
+
+    @field:ValidRole(message = "Invalid role. Accepted values are USER and ADMIN")
+    val role: Role
 )
