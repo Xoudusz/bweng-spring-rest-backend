@@ -2,6 +2,7 @@ package at.technikum.springrestbackend.config
 
 import at.technikum.springrestbackend.service.TokenService
 import jakarta.servlet.FilterChain
+import jakarta.servlet.http.Cookie
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -38,11 +39,17 @@ class JwtAuthorizationFilter(
                         )
                         authToken.details = WebAuthenticationDetailsSource().buildDetails(request)
                         SecurityContextHolder.getContext().authentication = authToken
+
+                        // Set the JWT token as an HttpOnly cookie
+                        val cookie = Cookie("JWT", token)
+                        cookie.isHttpOnly = true
+                        cookie.path = "/"
+                        response.addCookie(cookie)
                     }
                 }
             } catch (ex: Exception) {
                 response.writer.write(
-                    """{"error": "Filter Authorization error: 
+                    """{"error": "Filter Authorization error:
                     |${ex.message ?: "unknown error"}"}""".trimMargin()
                 )
             }
