@@ -47,7 +47,7 @@ class SecurityConfig {
                 it
                     .requestMatchers(
                         "/v3/api-docs/**", "/swagger-ui/**", "/swagger.html", // Allow Swagger paths
-                        "/api/auth", "/api/auth/refresh", "/error",           // Allow authentication endpoints
+                        "/api/auth/**", "/error",           // Allow authentication endpoints
                         "/api/users" // Allow user creation so we can get a jwt token (for testing)
                     ).permitAll()
                     .anyRequest().fullyAuthenticated() // Secure other endpoints

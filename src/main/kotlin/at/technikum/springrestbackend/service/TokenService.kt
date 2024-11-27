@@ -17,9 +17,12 @@ class TokenService(
             return SecretKeySpec(keyBytes, 0, keyBytes.size, "HmacSHA256")
         }
 
-    fun generateToken(subject: String, expiration: Date, additionalClaims: Map<String, Any> = emptyMap()): String {
+    fun generateToken(subject: String, role: String, expiration: Date, additionalClaims: Map<String, Any> = emptyMap()): String {
+        val claims = additionalClaims.toMutableMap()
+        claims["role"] = role // Add the role to the claims map
+
         return Jwts.builder()
-            .setClaims(additionalClaims)
+            .setClaims(claims)
             .setSubject(subject)
             .setIssuedAt(Date(System.currentTimeMillis()))
             .setExpiration(expiration)
@@ -29,6 +32,10 @@ class TokenService(
 
     fun extractUsername(token: String): String {
         return extractAllClaims(token).subject
+    }
+
+    fun extractRole(token: String): String? {
+        return extractAllClaims(token)["role"] as? String
     }
 
     private fun extractAllClaims(token: String): Claims {
