@@ -23,7 +23,7 @@ class AuthController(
         @RequestBody request: RefreshTokenRequest
     ): TokenResponse = TokenResponse(token = authenticationService.refreshAccessToken(request.token))
 
-    @PostMapping("/check")
+    @GetMapping("/check")
     fun checkTokenValidity(
         @RequestParam token: String
     ): Boolean = authenticationService.isTokenValid(token)
