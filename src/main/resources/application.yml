@@ -12,6 +12,12 @@ jwt:
 spring:
   application:
     name: bweng-spring-rest-backend
+  webflux:
+    cors:
+      enabled: false
+  mvc:
+    cors:
+      enabled: true
 
   datasource:
     url: jdbc:mariadb://localhost:3306/spring

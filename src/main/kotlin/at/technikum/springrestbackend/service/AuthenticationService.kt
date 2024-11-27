@@ -2,7 +2,6 @@ package at.technikum.springrestbackend.service
 
 import at.technikum.springrestbackend.entity.AuthenticationRequest
 import at.technikum.springrestbackend.entity.AuthenticationResponse
-import at.technikum.springrestbackend.entity.enums.Role
 import at.technikum.springrestbackend.repository.RefreshTokenRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.AuthenticationManager
@@ -29,6 +28,7 @@ class AuthenticationService(
             authenticationRequest.identifier.contains("@") -> {
                 userService.findByEmail(authenticationRequest.identifier)
             }
+
             else -> {
                 userService.findByUsername(authenticationRequest.identifier)
             }
@@ -38,7 +38,7 @@ class AuthenticationService(
             throw AuthenticationServiceException("User with identifier ${authenticationRequest.identifier} not found")
         }
 
-       authManager.authenticate(
+        authManager.authenticate(
             UsernamePasswordAuthenticationToken(
                 foundUser.username,
                 authenticationRequest.password
@@ -102,9 +102,6 @@ class AuthenticationService(
             throw AuthenticationServiceException("Invalid refresh token")
         }
     }
-
-
-
 
 
     private fun createAccessToken(user: UserDetails, role: String): String {
