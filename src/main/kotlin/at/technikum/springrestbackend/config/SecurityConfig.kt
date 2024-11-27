@@ -73,9 +73,10 @@ class SecurityConfig {
     fun corsConfigurationSource(): UrlBasedCorsConfigurationSource {
         val source = UrlBasedCorsConfigurationSource()
         val config = CorsConfiguration()
-        config.allowedOrigins = listOf("*")
+        config.allowedOrigins = listOf("http://localhost:8081")
         config.allowedMethods = listOf("*")
         config.allowedHeaders = listOf("*")
+        config.allowCredentials = true
         source.registerCorsConfiguration("/api/**", config)
         return source
     }
