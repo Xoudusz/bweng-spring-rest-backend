@@ -75,6 +75,38 @@ class AuthenticationService(
         }
     }
 
+    fun isTokenValid(token: String): Boolean {
+        return try {
+            // Try to extract the claims and check the expiration date
+            val claims = tokenService.extractAllClaims(token)
+            val expiration = claims.expiration
+            Date().before(expiration) // Returns true if the token is not expired
+        } catch (e: Exception) {
+            // If any exception occurs (e.g., token is invalid, signature mismatch), return false
+            false
+        }
+    }
+
+    // New method to logout (invalidate the refresh token)
+    fun logout(refreshToken: String) {
+        // Extract the username from the refresh token
+        val username = tokenService.extractUsername(refreshToken)
+
+        // Find the refresh token in the repository
+        val refreshTokenUserDetails = refreshTokenRepository.findUserDetailsByToken(refreshToken)
+
+        // If the refresh token is valid and associated with the user, remove it from the repository
+        if (refreshTokenUserDetails?.username == username) {
+            refreshTokenRepository.deleteByToken(refreshToken)
+        } else {
+            throw AuthenticationServiceException("Invalid refresh token")
+        }
+    }
+
+
+
+
+
     private fun createAccessToken(user: UserDetails, role: String): String {
         return tokenService.generateToken(
             subject = user.username,

@@ -30,6 +30,9 @@ class TokenService(
             .compact()
     }
 
+
+
+
     fun extractUsername(token: String): String {
         return extractAllClaims(token).subject
     }
@@ -38,7 +41,7 @@ class TokenService(
         return extractAllClaims(token)["role"] as? String
     }
 
-    private fun extractAllClaims(token: String): Claims {
+    fun extractAllClaims(token: String): Claims {
         return Jwts.parserBuilder()
             .setSigningKey(signingKey)
             .build()
