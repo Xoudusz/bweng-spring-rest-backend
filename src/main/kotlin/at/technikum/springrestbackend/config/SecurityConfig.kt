@@ -65,7 +65,6 @@ class SecurityConfig {
         return http.build()
     }
 
-
     @Bean
     fun encoder(): PasswordEncoder = BCryptPasswordEncoder()
 
@@ -80,5 +79,4 @@ class SecurityConfig {
         source.registerCorsConfiguration("/api/**", config)
         return source
     }
-
 }

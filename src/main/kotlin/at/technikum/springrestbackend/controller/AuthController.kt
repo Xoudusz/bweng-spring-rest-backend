@@ -25,13 +25,20 @@ class AuthController(
 
     @GetMapping("/check")
     fun checkTokenValidity(
-        @RequestParam token: String
-    ): Boolean = authenticationService.isTokenValid(token)
+        @RequestHeader("Authorization") authorizationHeader: String
+    ): Boolean {
+        val token = authorizationHeader.removePrefix("Bearer ").trim()
+        return authenticationService.isTokenValid(token)
+    }
+
 
     @PostMapping("/logout")
     fun logout(
-        @RequestParam token: String
+        @RequestBody request: LogoutRequest
     ) {
-        authenticationService.logout(token)
+        authenticationService.logout(request.token)
     }
+
+
+    data class LogoutRequest(val token: String)
 }

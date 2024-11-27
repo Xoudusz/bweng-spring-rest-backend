@@ -22,5 +22,9 @@ data class User(
 
     val role: Role,
 
+    val salutation: String,
+
+    val country: String,
+
     val createdAt: LocalDateTime = LocalDateTime.now()
 )
