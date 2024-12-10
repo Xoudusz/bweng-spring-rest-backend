@@ -6,4 +6,5 @@ import java.io.InputStream
 interface FileStorage {
     fun upload(file: MultipartFile): String
     fun download(id: String): InputStream
+    fun delete(id: String)
 }

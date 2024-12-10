@@ -48,4 +48,20 @@ class FileServiceImpl(
             resource = resource
         )
     }
+
+
+    @Transactional
+    override fun deleteFile(uuid: String): Boolean {
+        // Check if the file exists in the database
+        val fileEntity = fileRepository.findByUuid(uuid)
+            ?: throw FileException("File with uuid=$uuid not found")
+
+        // Delete the file from MinIO
+        fileStorage.delete(uuid)
+
+        // Remove the file record from the database
+        fileRepository.delete(fileEntity)
+
+        return true // Return true to indicate success
+    }
 }

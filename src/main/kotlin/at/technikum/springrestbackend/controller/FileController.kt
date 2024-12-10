@@ -35,4 +35,10 @@ class FileController(
             .contentType(MediaType.parseMediaType(fileDownloadResponse.contentType))
             .body(fileDownloadResponse.resource)
     }
+
+    @DeleteMapping("/{uuid}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun deleteFile(@PathVariable uuid: String) {
+        fileService.deleteFile(uuid)
+    }
 }

@@ -45,5 +45,18 @@ class MinioStorage(
             throw FileException("Download failed for id=$id", e)
         }
     }
+
+    override fun delete(id: String) {
+        try {
+            minioClient.removeObject(
+                io.minio.RemoveObjectArgs.builder()
+                    .bucket(bucketName)
+                    .`object`(id)
+                    .build()
+            )
+        } catch (e: Exception) {
+            throw FileException("Failed to delete file with id=$id", e)
+        }
+    }
 }
 
