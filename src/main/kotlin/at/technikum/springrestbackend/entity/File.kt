@@ -21,5 +21,8 @@ data class File(
     val contentType: String,
 
     @Column(nullable = false)
-    val createdAt: Instant = Instant.now()
+    val createdAt: Instant = Instant.now(),
+
+    @Column(nullable = false)
+    val uploader: String
 )

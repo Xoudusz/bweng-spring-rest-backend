@@ -18,9 +18,15 @@ class FileController(
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
     fun uploadFile(@RequestPart("file") file: MultipartFile): FileUploadResponse {
-        val uuid = fileService.uploadFile(file)
+        // Retrieve the authenticated user's username from the security context
+        val authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().authentication
+        val username = authentication.name // This should correspond to "sub" in JWT
+
+        // Pass the username to the service so it can be saved as the uploader
+        val uuid = fileService.uploadFile(file, username)
         return FileUploadResponse(uuid = uuid, message = "File uploaded successfully.")
     }
+
 
     @GetMapping("/{uuid}")
     fun downloadFile(@PathVariable uuid: String): ResponseEntity<InputStreamResource> {

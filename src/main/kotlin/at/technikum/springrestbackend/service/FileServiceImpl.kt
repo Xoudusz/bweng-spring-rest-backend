@@ -14,10 +14,11 @@ class FileServiceImpl(
     private val fileStorage: FileStorage,
     private val fileRepository: FileRepository
 ) : FileService {
-    private val allowedContentTypes = listOf("image/jpeg", "image/png") // restrict file upload to png and jpeg
+
+    private val allowedContentTypes = listOf("image/jpeg", "image/png")
 
     @Transactional
-    override fun uploadFile(file: MultipartFile): String {
+    override fun uploadFile(file: MultipartFile, uploader: String): String {
         // Validate content type
         if (file.contentType !in allowedContentTypes) {
             throw IllegalArgumentException("Invalid file type. Only images are allowed.")
@@ -27,12 +28,12 @@ class FileServiceImpl(
         val entity = File(
             uuid = uuid,
             fileName = file.originalFilename ?: uuid,
-            contentType = file.contentType ?: "application/octet-stream"
+            contentType = file.contentType ?: "application/octet-stream",
+            uploader = uploader
         )
         fileRepository.save(entity)
         return uuid
     }
-
 
     @Transactional(readOnly = true)
     override fun downloadFile(uuid: String): FileDownloadResponse {
@@ -49,19 +50,14 @@ class FileServiceImpl(
         )
     }
 
-
     @Transactional
     override fun deleteFile(uuid: String): Boolean {
-        // Check if the file exists in the database
         val fileEntity = fileRepository.findByUuid(uuid)
             ?: throw FileException("File with uuid=$uuid not found")
 
-        // Delete the file from MinIO
         fileStorage.delete(uuid)
-
-        // Remove the file record from the database
         fileRepository.delete(fileEntity)
 
-        return true // Return true to indicate success
+        return true
     }
 }
