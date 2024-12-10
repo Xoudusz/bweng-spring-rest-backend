@@ -1,12 +1,14 @@
 package at.technikum.springrestbackend.property
 
 import org.springframework.boot.context.properties.ConfigurationProperties
+import org.springframework.context.annotation.Configuration
 
-@ConfigurationProperties(prefix = "spring.minio")
+@Configuration
+@ConfigurationProperties(prefix = "minio")
 data class MinioProperties(
-    val url: String,
-    val port: Int,
-    val user: String,
-    val password: String,
-    val bucket: String
+    var url: String = "",
+    var port: Int = 9000,
+    var user: String = "",
+    var password: String = "",
+    var bucket: String = "files"
 )

@@ -26,11 +26,11 @@ spring:
     properties:
       hibernate.dialect: org.hibernate.dialect.MariaDBDialect
 
-  minio:
-    url: ${BUCKET_HOST:http://minio}
-    port: ${BUCKET_PORT:9000}
-    user: ${BUCKET_ACCESS_KEY:minioadmin}
-    password: ${BUCKET_ACCESS_SECRET:minioadminpw}
-    bucket: ${BUCKET_NAME:files}
-  
+minio:
+  url: http://localhost
+  port: 9000
+  user: minioadmin
+  password: minioadminpw
+  bucket: files
+
 

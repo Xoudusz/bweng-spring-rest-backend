@@ -14,10 +14,15 @@ class FileServiceImpl(
     private val fileStorage: FileStorage,
     private val fileRepository: FileRepository
 ) : FileService {
-
+    private val allowedContentTypes = listOf("image/jpeg", "image/png") // restrict file upload to png and jpeg
 
     @Transactional
     override fun uploadFile(file: MultipartFile): String {
+        // Validate content type
+        if (file.contentType !in allowedContentTypes) {
+            throw IllegalArgumentException("Invalid file type. Only images are allowed.")
+        }
+
         val uuid = fileStorage.upload(file)
         val entity = File(
             uuid = uuid,
@@ -27,6 +32,7 @@ class FileServiceImpl(
         fileRepository.save(entity)
         return uuid
     }
+
 
     @Transactional(readOnly = true)
     override fun downloadFile(uuid: String): FileDownloadResponse {
@@ -42,5 +48,4 @@ class FileServiceImpl(
             resource = resource
         )
     }
-
 }

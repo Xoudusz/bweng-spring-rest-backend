@@ -1,7 +1,5 @@
 package at.technikum.springrestbackend.controller
 
-
-
 import at.technikum.springrestbackend.service.FileService
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpStatus
@@ -10,7 +8,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
-
 data class FileUploadResponse(val uuid: String, val message: String)
 
 @RestController
@@ -18,11 +15,6 @@ data class FileUploadResponse(val uuid: String, val message: String)
 class FileController(
     private val fileService: FileService
 ) {
-    /**
-     * Endpoint to upload a file.
-     * Expects multipart/form-data.
-     * Returns reference (uuid) of the uploaded file.
-     */
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @ResponseStatus(HttpStatus.CREATED)
     fun uploadFile(@RequestPart("file") file: MultipartFile): FileUploadResponse {
@@ -43,8 +35,4 @@ class FileController(
             .contentType(MediaType.parseMediaType(fileDownloadResponse.contentType))
             .body(fileDownloadResponse.resource)
     }
-
-
-
-
 }
