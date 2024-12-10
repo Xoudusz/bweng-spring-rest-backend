@@ -4,7 +4,6 @@ import at.technikum.springrestbackend.entity.File
 import at.technikum.springrestbackend.exception.FileException
 import at.technikum.springrestbackend.repository.FileRepository
 import at.technikum.springrestbackend.storage.FileStorage
-import org.springframework.context.annotation.Lazy
 import org.springframework.core.io.InputStreamResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -12,11 +11,11 @@ import org.springframework.web.multipart.MultipartFile
 
 @Service
 class FileServiceImpl(
-    @Lazy private val fileStorage: FileStorage,
+    private val fileStorage: FileStorage,
     private val fileRepository: FileRepository
 ) : FileService {
 
-    @Lazy
+
     @Transactional
     override fun uploadFile(file: MultipartFile): String {
         val uuid = fileStorage.upload(file)
