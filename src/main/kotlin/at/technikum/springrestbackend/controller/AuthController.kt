@@ -25,6 +25,25 @@ class AuthController(
         @RequestBody request: RefreshTokenRequest
     ): TokenResponse = TokenResponse(token = authenticationService.refreshAccessToken(request.token))
 
+    @GetMapping("/check")
+    fun checkTokenValidity(
+        @RequestHeader("Authorization") authorizationHeader: String
+    ): Boolean {
+        val token = authorizationHeader.removePrefix("Bearer ").trim()
+        return authenticationService.isTokenValid(token)
+    }
+
+
+    @PostMapping("/logout")
+    fun logout(
+        @RequestBody request: LogoutRequest
+    ) {
+        authenticationService.logout(request.token)
+    }
+
+
+    data class LogoutRequest(val token: String)
+    
     @PostMapping("/logout")
     fun logout(@RequestBody request: RefreshTokenRequest): ResponseEntity<Void> {
         authenticationService.logout(request.token)

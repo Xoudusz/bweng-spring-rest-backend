@@ -27,5 +27,9 @@ data class UserDTO(
     val password: String,
 
     @field:ValidRole(message = "Invalid role. Accepted values are USER and ADMIN")
-    val role: Role
+    val role: Role,
+
+    val salutation: String,
+
+    val country: String,
 )
