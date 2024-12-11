@@ -5,6 +5,8 @@ import at.technikum.springrestbackend.dto.PostUpdateDTO
 import at.technikum.springrestbackend.entity.Post
 import at.technikum.springrestbackend.exception.notFound.PostNotFoundException
 import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
+import at.technikum.springrestbackend.exception.notFound.AccessDeniedException
+import at.technikum.springrestbackend.repository.FollowRepository
 import at.technikum.springrestbackend.repository.PostRepository
 import at.technikum.springrestbackend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,7 +17,8 @@ import java.util.*
 @Service
 class PostServiceImpl @Autowired constructor(
     private val postRepository: PostRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val followRepository: FollowRepository
 ) : PostService {
 
     @Transactional
@@ -38,7 +41,12 @@ class PostServiceImpl @Autowired constructor(
     }
 
     override fun getAllPosts(): List<Post> {
-        return postRepository.findAll()
+        return postRepository.findAll().filter { post ->
+            val user = userRepository.findById(post.userId).orElseThrow {
+                UserNotFoundException("User with ID ${post.userId} not found")
+            }
+            !user.isPrivate // Exclude posts from private users
+        }
     }
 
     override fun updatePost(id: UUID, postUpdateDTO: PostUpdateDTO): Post {
@@ -56,11 +64,24 @@ class PostServiceImpl @Autowired constructor(
         postRepository.deleteById(id)
     }
 
-    override fun getPostsByUser(userId: UUID): List<Post> {
-        val userExists = userRepository.existsById(userId)
-        if (!userExists) {
-            throw UserNotFoundException("User with ID $userId not found")
+    @Transactional
+    override fun getPostsByUser(userId: UUID, viewerId: UUID): List<Post> {
+        val user = userRepository.findById(userId).orElseThrow {
+            UserNotFoundException("User with ID $userId not found")
         }
+
+        // If the user's profile is private, check if the viewer is a follower
+        if (user.isPrivate) {
+            val isFollower = followRepository.existsByFollowerIdAndFollowingId(viewerId, userId)
+            if (!isFollower) {
+                throw AccessDeniedException("You do not have permission to view posts from this user")
+            }
+        }
+
+        // Return posts if access is granted
         return postRepository.findByUserId(userId)
     }
+
+
+
 }

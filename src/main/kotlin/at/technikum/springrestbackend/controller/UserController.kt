@@ -1,5 +1,7 @@
 package at.technikum.springrestbackend.controller
 
+import at.technikum.springrestbackend.dto.PasswordUpdateDTO
+import at.technikum.springrestbackend.dto.ProfileVisibilityDTO
 import at.technikum.springrestbackend.dto.UserDTO
 import at.technikum.springrestbackend.entity.User
 import at.technikum.springrestbackend.service.UserService
@@ -42,6 +44,24 @@ class UserController(private val userService: UserService) {
     fun deleteUser(@PathVariable id: UUID): ResponseEntity<Void> {
         userService.deleteUser(id)
         return ResponseEntity(HttpStatus.NO_CONTENT)
+    }
+
+    @PutMapping("/{id}/password")
+    fun updatePassword(
+        @PathVariable id: UUID,
+        @Valid @RequestBody passwordUpdateDTO: PasswordUpdateDTO
+    ): ResponseEntity<User> {
+        val updatedUser = userService.updatePassword(id, passwordUpdateDTO)
+        return ResponseEntity.ok(updatedUser)
+    }
+
+    @PatchMapping("/{id}/visibility")
+    fun updateProfileVisibility(
+        @PathVariable id: UUID,
+        @Valid @RequestBody profileVisibilityDTO: ProfileVisibilityDTO
+    ): ResponseEntity<User> {
+        val updatedUser = userService.updateProfileVisibility(id, profileVisibilityDTO)
+        return ResponseEntity.ok(updatedUser)
     }
 
     @GetMapping("/email/{email}")

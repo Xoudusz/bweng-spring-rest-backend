@@ -7,6 +7,7 @@ import at.technikum.springrestbackend.service.PostServiceImpl
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
@@ -35,10 +36,18 @@ class PostController(
     }
 
     @GetMapping("/user/{userId}")
-    fun getPostsByUser(@PathVariable userId: UUID): ResponseEntity<List<Post>> {
-        val posts = postServiceImpl.getPostsByUser(userId)
+    fun getPostsByUser(
+        @PathVariable userId: UUID,
+        authentication: Authentication
+    ): ResponseEntity<List<Post>> {
+        val viewerId = UUID.fromString(authentication.name)
+        println("Fetching posts for user $userId by viewer $viewerId")
+
+        val posts = postServiceImpl.getPostsByUser(userId, viewerId)
         return ResponseEntity(posts, HttpStatus.OK)
     }
+
+
 
     @PutMapping("/{id}")
     fun updatePost(@PathVariable id: UUID, @RequestBody @Valid postUpdateDTO: PostUpdateDTO): ResponseEntity<Post> {

@@ -1,5 +1,7 @@
 package at.technikum.springrestbackend.service
 
+import at.technikum.springrestbackend.dto.PasswordUpdateDTO
+import at.technikum.springrestbackend.dto.ProfileVisibilityDTO
 import at.technikum.springrestbackend.dto.UserDTO
 import at.technikum.springrestbackend.entity.User
 import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
@@ -50,6 +52,41 @@ class UserServiceImpl @Autowired constructor(
         return existingUser.copy(
             username = userDTO.username, email = userDTO.email, password = passwordEncoder.encode(userDTO.password), role = userDTO.role
         ).also { userRepository.save(it) }
+    }
+
+    @Transactional
+    override fun updatePassword(id: UUID, passwordUpdateDTO: PasswordUpdateDTO): User {
+        val existingUser = userRepository.findById(id).orElseThrow {
+            UserNotFoundException("User with ID $id not found")
+        }
+
+        // Validate the old password
+        if (!passwordEncoder.matches(passwordUpdateDTO.oldPassword, existingUser.password)) {
+            throw IllegalArgumentException("Old password is incorrect")
+        }
+
+        // Create a new User object with the updated password
+        val updatedUser = existingUser.copy(
+            password = passwordEncoder.encode(passwordUpdateDTO.newPassword)
+        )
+
+        return userRepository.save(updatedUser)
+    }
+
+    @Transactional
+    override fun updateProfileVisibility(userId: UUID, profileVisibilityDTO: ProfileVisibilityDTO): User {
+        // Find the user in the database
+        val user = userRepository.findById(userId).orElseThrow {
+            UserNotFoundException("User with ID $userId not found")
+        }
+
+        // Use the copy method to create an updated user object
+        val updatedUser = user.copy(
+            isPrivate = profileVisibilityDTO.isPrivate
+        )
+
+        // Save the updated user object
+        return userRepository.save(updatedUser)
     }
 
     @Transactional

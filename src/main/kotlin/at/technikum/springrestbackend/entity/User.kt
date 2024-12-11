@@ -22,5 +22,8 @@ data class User(
 
     val role: Role,
 
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+
+    @Column(nullable = false)
+    var isPrivate: Boolean = false, // Default to public
 )
