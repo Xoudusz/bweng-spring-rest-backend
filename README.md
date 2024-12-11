@@ -1,5 +1,7 @@
-# Backend Web Engineering Template Project
-This is the template project for the BWENG course.
+# Backend Web Engineering Project
+
+## Description
+This is a Spring Boot project that uses MariaDB as database and MinIO as storage. The project is a simple REST API that allows to manage users and their files. It is the backend for a social media platform.
 
 ## Requirements
 * Docker
