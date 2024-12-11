@@ -20,7 +20,7 @@ class FileController(
     fun uploadFile(@RequestPart("file") file: MultipartFile): FileUploadResponse {
         // Retrieve the authenticated user's username from the security context
         val authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().authentication
-        val username = authentication.name // This should correspond to "sub" in JWT
+        val username = authentication.name // This should correspond to "sub" in JWT payload
 
         // Pass the username to the service so it can be saved as the uploader
         val uuid = fileService.uploadFile(file, username)

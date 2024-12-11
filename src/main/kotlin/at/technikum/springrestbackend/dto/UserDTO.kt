@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.dto
 
+import at.technikum.springrestbackend.dto.validation.ValidCountryCode
 import at.technikum.springrestbackend.dto.validation.ValidRole
 import at.technikum.springrestbackend.entity.enums.Role
 import jakarta.validation.constraints.Email
@@ -31,5 +32,7 @@ data class UserDTO(
 
     val salutation: String,
 
+    @field:NotBlank(message = "Country code is required")
+    @field:ValidCountryCode(message = "Country code must be a valid ISO country code.")
     val country: String,
 )

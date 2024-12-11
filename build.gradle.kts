@@ -62,6 +62,9 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("io.github.microutils:kotlin-logging:3.0.5")
+
+	// ISO 3166 country codes
+	implementation("com.neovisionaries:nv-i18n:1.29")
 }
 
 kotlin {
