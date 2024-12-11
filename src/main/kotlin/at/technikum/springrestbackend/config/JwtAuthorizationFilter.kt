@@ -41,10 +41,12 @@ class JwtAuthorizationFilter(
                     }
                 }
             } catch (ex: Exception) {
+                response.status = HttpServletResponse.SC_UNAUTHORIZED
+                response.contentType = "application/json"
                 response.writer.write(
-                    """{"error": "Filter Authorization error: 
-                    |${ex.message ?: "unknown error"}"}""".trimMargin()
+                    """{"error": "Filter Authorization error: ${ex.message ?: "unknown error"}"}"""
                 )
+                return // Prevent further processing
             }
         }
 
