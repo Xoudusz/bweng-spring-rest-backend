@@ -1,7 +1,6 @@
 package at.technikum.springrestbackend.service
 
 import io.jsonwebtoken.Claims
-import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
@@ -42,16 +41,6 @@ class TokenService(
     }
 
     fun extractAllClaims(token: String): Claims {
-    fun validateToken(token: String): Boolean {
-        return try {
-            val claims = extractAllClaims(token)
-            !claims.expiration.before(Date())
-        } catch (e: JwtException) {
-            false
-        }
-    }
-
-    private fun extractAllClaims(token: String): Claims {
         return Jwts.parserBuilder()
             .setSigningKey(signingKey)
             .build()

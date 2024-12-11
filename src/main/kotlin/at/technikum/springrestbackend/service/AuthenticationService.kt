@@ -105,21 +105,6 @@ class AuthenticationService(
 
 
     private fun createAccessToken(user: UserDetails, role: String): String {
-    fun logout(refreshToken: String) {
-        refreshTokenRepository.deleteByToken(refreshToken)
-    }
-
-    fun checkToken(token: String): String {
-        val jwtToken = token.removePrefix("Bearer ")
-        if (tokenService.validateToken(jwtToken)) {
-            val userDetails = userDetailsService.loadUserByUsername(tokenService.extractUsername(jwtToken))
-            return userDetails.authorities.joinToString { it.authority }
-        } else {
-            throw AuthenticationServiceException("Invalid token")
-        }
-    }
-
-    private fun createAccessToken(user: UserDetails): String {
         return tokenService.generateToken(
             subject = user.username,
             expiration = Date(System.currentTimeMillis() + accessTokenExpiration),
