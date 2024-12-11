@@ -15,7 +15,7 @@ class FileServiceImpl(
     private val fileRepository: FileRepository
 ) : FileService {
 
-    private val allowedContentTypes = listOf("image/jpeg", "image/png")
+    private val allowedContentTypes = listOf("image/jpeg", "image/png", "video/mp4",)
 
     @Transactional
     override fun uploadFile(file: MultipartFile, uploader: String): String {

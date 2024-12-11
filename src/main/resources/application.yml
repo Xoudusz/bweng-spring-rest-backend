@@ -26,6 +26,11 @@ spring:
     properties:
       hibernate.dialect: org.hibernate.dialect.MariaDBDialect
 
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
 minio:
   url: http://localhost
   port: 9000
