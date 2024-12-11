@@ -6,6 +6,7 @@ import at.technikum.springrestbackend.exception.notFound.PostNotFoundException
 import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
 import io.jsonwebtoken.ExpiredJwtException
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -114,11 +115,14 @@ class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalStateException::class)
-    @ResponseStatus(HttpStatus.CONFLICT)
     fun handleIllegalStateException(
         ex: IllegalStateException,
-        request: HttpServletRequest
-        ): ResponseEntity<ErrorResponse>{
+        request: HttpServletRequest,
+        response: HttpServletResponse
+    ): ResponseEntity<ErrorResponse>? {
+        if (response.isCommitted) {
+            return null
+        }
         val errorResponse = ErrorResponse(
             status = HttpStatus.CONFLICT.value(),
             error = "Conflict",
