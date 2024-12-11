@@ -12,7 +12,7 @@ data class User(
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: UUID = UUID.randomUUID(),
 
-    @Column(length = 5, unique = true)
+    @Column(unique = true)
     val username: String,
 
     @Column(unique = true)
