@@ -13,5 +13,6 @@ interface PostService {
     fun getAllPosts(): List<Post>
     fun updatePost(id: UUID, postUpdateDTO: PostUpdateDTO): Post?
     fun deletePost(id: UUID)
-    fun getPostsByUser(userId: UUID): List<Post>
+
+    fun getPostsByUser(userId: UUID, viewerUsername: String): List<Post>
 }

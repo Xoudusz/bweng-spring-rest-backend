@@ -146,5 +146,18 @@ class GlobalExceptionHandler {
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleAccessDeniedException(
+        ex: AccessDeniedException, request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        val errorResponse = ErrorResponse(
+            status = HttpStatus.FORBIDDEN.value(),
+            error = "Access Denied",
+            message = ex.message ?: "You do not have permission to access this resource.",
+            path = request.requestURI
+        )
+        return ResponseEntity(errorResponse, HttpStatus.FORBIDDEN)
+    }
+
 
 }

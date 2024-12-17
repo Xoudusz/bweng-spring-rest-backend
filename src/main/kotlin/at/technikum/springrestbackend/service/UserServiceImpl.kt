@@ -1,5 +1,7 @@
 package at.technikum.springrestbackend.service
 
+import at.technikum.springrestbackend.dto.PasswordUpdateDTO
+import at.technikum.springrestbackend.dto.ProfileVisibilityDTO
 import at.technikum.springrestbackend.dto.UserDTO
 import at.technikum.springrestbackend.entity.User
 import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
@@ -60,6 +62,38 @@ class UserServiceImpl @Autowired constructor(
             country = userDTO.country,
             salutation = userDTO.salutation
         ).also { userRepository.save(it) }
+    }
+
+    @Transactional
+    override fun updatePassword(id: UUID, passwordUpdateDTO: PasswordUpdateDTO): User {
+        val existingUser = userRepository.findById(id).orElseThrow {
+            UserNotFoundException("User with ID $id not found")
+        }
+
+        // Validate the old password
+        if (!passwordEncoder.matches(passwordUpdateDTO.oldPassword, existingUser.password)) {
+            throw IllegalArgumentException("Old password is incorrect")
+        }
+
+        // Create a new User object with the updated password
+        val updatedUser = existingUser.copy(
+            password = passwordEncoder.encode(passwordUpdateDTO.newPassword),
+
+        )
+
+        return userRepository.save(updatedUser)
+    }
+
+    @Transactional
+    override fun updateProfileVisibility(userId: UUID, profileVisibilityDTO: ProfileVisibilityDTO): User {
+
+        val user = userRepository.findById(userId).orElseThrow {
+            UserNotFoundException("User with ID $userId not found")
+        }
+        val updatedUser = user.copy(
+            isPrivate = profileVisibilityDTO.isPrivate
+        )
+        return userRepository.save(updatedUser)
     }
 
     @Transactional

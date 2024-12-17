@@ -7,5 +7,6 @@ import java.util.UUID
 interface FollowRepository : JpaRepository<Follow, UUID> {
     fun findByFollowerId(followerId: UUID): List<Follow>
     fun findByFollowingId(followingId: UUID): List<Follow>
+    fun existsByFollowerIdAndFollowingId(followerId: UUID, followingId: UUID): Boolean
 
 }
