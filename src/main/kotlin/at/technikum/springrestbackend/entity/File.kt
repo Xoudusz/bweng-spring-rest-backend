@@ -8,9 +8,6 @@ import java.time.Instant
 @Table(name = "files")
 data class File(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
-
     @Column(nullable = false, unique = true)
     val uuid: String,
 
