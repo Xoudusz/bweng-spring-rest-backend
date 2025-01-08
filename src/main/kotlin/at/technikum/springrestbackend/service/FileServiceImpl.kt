@@ -4,6 +4,7 @@ import at.technikum.springrestbackend.entity.File
 import at.technikum.springrestbackend.exception.FileException
 import at.technikum.springrestbackend.repository.FileRepository
 import at.technikum.springrestbackend.storage.FileStorage
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.io.InputStreamResource
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -12,16 +13,15 @@ import org.springframework.web.multipart.MultipartFile
 @Service
 class FileServiceImpl(
     private val fileStorage: FileStorage,
-    private val fileRepository: FileRepository
+    private val fileRepository: FileRepository,
+    @Value("\${file.allowed-types}") private val allowedContentTypes: List<String>
 ) : FileService {
-
-    private val allowedContentTypes = listOf("image/jpeg", "image/png", "video/mp4",)
 
     @Transactional
     override fun uploadFile(file: MultipartFile, uploader: String): String {
         // Validate content type
         if (file.contentType !in allowedContentTypes) {
-            throw IllegalArgumentException("Invalid file type. Only images are allowed.")
+            throw IllegalArgumentException("Invalid file type. Allowed types are: $allowedContentTypes")
         }
 
         val uuid = fileStorage.upload(file)

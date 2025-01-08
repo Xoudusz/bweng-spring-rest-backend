@@ -5,6 +5,7 @@ import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 
@@ -19,7 +20,7 @@ class FileController(
     @ResponseStatus(HttpStatus.CREATED)
     fun uploadFile(@RequestPart("file") file: MultipartFile): FileUploadResponse {
         // Retrieve the authenticated user's username from the security context
-        val authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().authentication
+        val authentication = SecurityContextHolder.getContext().authentication
         val username = authentication.name // This should correspond to "sub" in JWT payload
 
         // Pass the username to the service so it can be saved as the uploader
