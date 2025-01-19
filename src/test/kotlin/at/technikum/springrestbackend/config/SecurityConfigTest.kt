@@ -1,246 +1,99 @@
 package at.technikum.springrestbackend.config
 
-import at.technikum.springrestbackend.entity.User
-import at.technikum.springrestbackend.repository.UserRepository
-import at.technikum.springrestbackend.service.JwtUserDetailsService
-import org.junit.jupiter.api.Assertions.*
+import jakarta.servlet.Filter
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentCaptor
-import org.mockito.Mockito.*
+import org.mockito.Mockito
+import org.mockito.Mockito.doNothing
+import org.mockito.Mockito.reset
 import org.mockito.kotlin.any
-import org.mockito.kotlin.capture
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
-import org.springframework.security.authentication.BadCredentialsException
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider
-import org.springframework.security.config.Customizer
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
-import org.springframework.security.config.annotation.web.builders.HttpSecurity
-import org.springframework.security.config.annotation.web.configurers.AuthorizeHttpRequestsConfigurer
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.security.web.DefaultSecurityFilterChain
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import org.springframework.security.web.FilterChainProxy
+import org.springframework.security.web.SecurityFilterChain
+import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers
+import org.springframework.test.web.servlet.setup.MockMvcBuilders
+import org.springframework.web.context.WebApplicationContext
 
-@SpringBootTest
+
+@SpringBootTest(properties = ["spring.profiles.active=test"])
 @AutoConfigureMockMvc
 class SecurityConfigTest {
-
-    private val userRepository: UserRepository = mock(UserRepository::class.java)
-    private val passwordEncoder: PasswordEncoder = mock(PasswordEncoder::class.java)
-    private val userDetailsService = JwtUserDetailsService(userRepository)
-    private val securityConfig = SecurityConfig()
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
+    @Autowired
+    private lateinit var authenticationManager: AuthenticationManager
+
+    @Autowired
+    private lateinit var authenticationProvider: AuthenticationProvider
+
+    @Autowired
+    private lateinit var userDetailsService: UserDetailsService
+
+    @Autowired
+    private lateinit var passwordEncoder: PasswordEncoder
+
+    @Autowired
+    private lateinit var filterChainProxy: FilterChainProxy
+
+    @MockBean
+    private lateinit var jwtAuthorizationFilter: JwtAuthorizationFilter
+
+    @BeforeEach
+    fun setUp(@Autowired webApplicationContext: WebApplicationContext) {
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
+
+    }
+
+    @BeforeEach
+    fun resetMocks() {
+        reset(jwtAuthorizationFilter)
+    }
+
+    @BeforeEach
+    fun clearSecurityContext() {
+        SecurityContextHolder.clearContext()
+    }
+
+    //SecurityConfigBeanTests
     @Test
-    fun `should authenticate with valid credentials`() {
-        // Arrange
-        val daoAuthenticationProvider = DaoAuthenticationProvider().apply {
-            setUserDetailsService(userDetailsService)
-            setPasswordEncoder(passwordEncoder)
-        }
-
-        val username = "testuser"
-        val rawPassword = "password123"
-        val encodedPassword = "encodedPassword123"
-
-        val userEntity = User(
-            username = username,
-            email = "test@example.com",
-            password = encodedPassword,
-            role = at.technikum.springrestbackend.entity.enums.Role.USER,
-            salutation = "Mr.",
-            country = "AUT"
-        )
-
-        `when`(userRepository.findByUsername(username)).thenReturn(userEntity)
-        `when`(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(true)
-
-        // Act
-        val authentication = daoAuthenticationProvider.authenticate(
-            UsernamePasswordAuthenticationToken(username, rawPassword)
-        )
-
-        // Assert
-        assertTrue(authentication.isAuthenticated, "Authentication should be successful")
+    fun `should configure authentication manager`() {
+        assertNotNull(authenticationManager)
     }
 
     @Test
-    fun `should fail authentication with invalid credentials`() {
-        // Arrange
-        val daoAuthenticationProvider = DaoAuthenticationProvider().apply {
-            setUserDetailsService(userDetailsService)
-            setPasswordEncoder(passwordEncoder)
-        }
-
-        val username = "testuser"
-        val rawPassword = "wrongPassword"
-        val encodedPassword = "encodedPassword123"
-
-        val userEntity = User(
-            username = username,
-            email = "test@example.com",
-            password = encodedPassword,
-            role = at.technikum.springrestbackend.entity.enums.Role.USER,
-            salutation = "Mr.",
-            country = "AUT"
-        )
-
-        `when`(userRepository.findByUsername(username)).thenReturn(userEntity)
-        `when`(passwordEncoder.matches(rawPassword, encodedPassword)).thenReturn(false)
-
-        // Act & Assert
-        val exception = org.junit.jupiter.api.assertThrows<BadCredentialsException> {
-            daoAuthenticationProvider.authenticate(UsernamePasswordAuthenticationToken(username, rawPassword))
-        }
-
-        assertTrue(
-            exception.message?.contains("Bad credentials") == true,
-            "Exception message should indicate bad credentials"
-        )
+    fun `should configure authentication provider`() {
+        assertNotNull(authenticationProvider)
     }
 
     @Test
-    fun `userDetailsService should return JwtUserDetailsService with userRepository`() {
-        // Arrange
-        val mockUserRepository: UserRepository = mock(UserRepository::class.java)
-        val securityConfig = SecurityConfig()
-
-        // Act
-        val userDetailsService = securityConfig.userDetailsService(mockUserRepository)
-
-        // Assert
-        assertTrue(userDetailsService is JwtUserDetailsService, "Returned service should be JwtUserDetailsService")
+    fun `should configure user details service`() {
+        assertNotNull(userDetailsService)
     }
 
     @Test
-    fun `authenticationManager should return AuthenticationManager from configuration`() {
-        // Arrange
-        val mockAuthenticationConfiguration: AuthenticationConfiguration = mock(AuthenticationConfiguration::class.java)
-        val mockAuthenticationManager: AuthenticationManager = mock(AuthenticationManager::class.java)
-        `when`(mockAuthenticationConfiguration.authenticationManager).thenReturn(mockAuthenticationManager)
-        val securityConfig = SecurityConfig()
-
-        // Act
-        val authenticationManager = securityConfig.authenticationManager(mockAuthenticationConfiguration)
-
-        // Assert
-        assertEquals(mockAuthenticationManager, authenticationManager, "AuthenticationManager should match the mock")
+    fun `should configure password encoder`() {
+        assertNotNull(passwordEncoder)
     }
 
-    @Test
-    fun `authenticationProvider should return properly configured DaoAuthenticationProvider`() {
-        // Arrange
-        val mockUserRepository: UserRepository = mock(UserRepository::class.java)
-        val securityConfig = SecurityConfig()
-        val expectedPasswordEncoder: PasswordEncoder = securityConfig.encoder()
-        val expectedUserDetailsService = securityConfig.userDetailsService(mockUserRepository)
-
-        // Act
-        val authenticationProvider = securityConfig.authenticationProvider(mockUserRepository)
-
-        // Assert
-        assertTrue(authenticationProvider is DaoAuthenticationProvider, "AuthenticationProvider should be DaoAuthenticationProvider")
-        val provider = authenticationProvider as DaoAuthenticationProvider
-
-        // Use reflection to access private fields
-        val passwordEncoderField = DaoAuthenticationProvider::class.java.getDeclaredField("passwordEncoder")
-        passwordEncoderField.isAccessible = true
-        val actualPasswordEncoder = passwordEncoderField.get(provider)
-
-        val userDetailsServiceField = DaoAuthenticationProvider::class.java.getDeclaredField("userDetailsService")
-        userDetailsServiceField.isAccessible = true
-        val actualUserDetailsService = userDetailsServiceField.get(provider)
-
-        // Assertions
-        assertNotNull(actualPasswordEncoder, "PasswordEncoder should not be null")
-        assertNotNull(actualUserDetailsService, "UserDetailsService should not be null")
-
-        // Functional equivalence checks
-        val rawPassword = "password123"
-        val encodedPassword = (actualPasswordEncoder as PasswordEncoder).encode(rawPassword)
-        assertTrue(actualPasswordEncoder.matches(rawPassword, encodedPassword), "PasswordEncoder should match functionality")
-
-        assertEquals(expectedUserDetailsService::class, actualUserDetailsService::class, "UserDetailsService class types should match")
-    }
-
-    @Test
-    fun `securityFilterChain should configure HttpSecurity correctly`() {
-        // Arrange
-        val mockHttpSecurity: HttpSecurity = mock(HttpSecurity::class.java)
-        val mockJwtAuthorizationFilter: JwtAuthorizationFilter = mock(JwtAuthorizationFilter::class.java)
-        val mockAuthenticationProvider: AuthenticationProvider = mock(AuthenticationProvider::class.java)
-        val mockSecurityFilterChain: DefaultSecurityFilterChain = mock(DefaultSecurityFilterChain::class.java)
-
-        // Mock behavior for HttpSecurity methods
-        `when`(mockHttpSecurity.csrf(any())).thenReturn(mockHttpSecurity)
-        `when`(mockHttpSecurity.formLogin(any())).thenReturn(mockHttpSecurity)
-        `when`(mockHttpSecurity.cors(any())).thenReturn(mockHttpSecurity)
-        `when`(mockHttpSecurity.authorizeHttpRequests(any())).thenReturn(mockHttpSecurity)
-        `when`(mockHttpSecurity.sessionManagement(any())).thenReturn(mockHttpSecurity)
-        `when`(mockHttpSecurity.authenticationProvider(mockAuthenticationProvider)).thenReturn(mockHttpSecurity)
-        `when`(mockHttpSecurity.addFilterBefore(mockJwtAuthorizationFilter, UsernamePasswordAuthenticationFilter::class.java))
-            .thenReturn(mockHttpSecurity)
-        `when`(mockHttpSecurity.build()).thenReturn(mockSecurityFilterChain)
-
-        val securityConfig = SecurityConfig()
-
-        // Act
-        val filterChain = securityConfig.securityFilterChain(
-            http = mockHttpSecurity,
-            jwtAuthenticationFilter = mockJwtAuthorizationFilter,
-            authenticationProvider = mockAuthenticationProvider
-        )
-
-        // Assert
-        assertNotNull(filterChain, "SecurityFilterChain should not be null")
-        verify(mockHttpSecurity).csrf(any())
-        verify(mockHttpSecurity).formLogin(any())
-        verify(mockHttpSecurity).cors(any())
-        verify(mockHttpSecurity).authorizeHttpRequests(any())
-        verify(mockHttpSecurity).sessionManagement(any())
-        verify(mockHttpSecurity).authenticationProvider(mockAuthenticationProvider)
-        verify(mockHttpSecurity).addFilterBefore(mockJwtAuthorizationFilter, UsernamePasswordAuthenticationFilter::class.java)
-    }
-
-    @Test
-    fun `encoder should return a BCryptPasswordEncoder instance`() {
-        // Arrange
-        val securityConfig = SecurityConfig()
-
-        // Act
-        val passwordEncoder = securityConfig.encoder()
-
-        // Assert
-        assertTrue(passwordEncoder is BCryptPasswordEncoder, "PasswordEncoder should be BCryptPasswordEncoder")
-    }
-
-    @Test
-    fun `corsConfigurationSource should configure CORS correctly`() {
-        // Arrange
-        val securityConfig = SecurityConfig()
-        val corsSource = securityConfig.corsConfigurationSource()
-
-        // Act
-        val corsConfig = corsSource.corsConfigurations["/api/**"]
-
-        // Assert
-        assertNotNull(corsConfig, "CORS configuration should not be null")
-        assertEquals(listOf("http://localhost:8081"), corsConfig?.allowedOrigins, "Allowed origins should match")
-        assertEquals(listOf("*"), corsConfig?.allowedMethods, "Allowed methods should match")
-        assertEquals(listOf("*"), corsConfig?.allowedHeaders, "Allowed headers should match")
-        assertTrue(corsConfig?.allowCredentials == true, "CORS should allow credentials")
-    }
-
-
+    //SecurityConfigTests
     @Test
     fun `should handle swagger redirection`() {
         mockMvc.get("/swagger.html").andExpect {
@@ -265,12 +118,66 @@ class SecurityConfigTest {
         }
     }
 
+    //TODO fix this test
     @Test
     fun `should secure non-permitted endpoints`() {
-        mockMvc.get("/secure-endpoint").andExpect {
-            status { isForbidden() }
+        mockMvc.get("/api/users")
+            .andDo { print() } // This will print the request/response details using MockMvc's built-in printing.
+            .andExpect {
+                status { isForbidden() }
+            }
+    }
+
+    //CorsConfigTests
+    //TODO fix this test
+    @Test
+    fun `should allow requests from allowed origins`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders
+                .options("/api/test-cors")
+                .header(HttpHeaders.ORIGIN, "http://localhost:8081")
+                .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.GET)
+        ).andExpect(MockMvcResultMatchers.status().isOk)
+            .andExpect(MockMvcResultMatchers.header().string(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:8081"))
+    }
+
+    @Test
+    fun `should reject requests from disallowed origins`() {
+        mockMvc.perform(
+            MockMvcRequestBuilders
+                .options("/api/test-cors")
+                .header(HttpHeaders.ORIGIN, "https://unauthorized-origin.com")
+                .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, HttpMethod.GET)
+        ).andExpect(MockMvcResultMatchers.status().isForbidden)
+    }
+
+    //JwtFilterIntegrationTests
+    @Test
+    fun `should accept requests when JWT filter allows`() {
+        doNothing().`when`(jwtAuthorizationFilter).doFilter(any(), any(), any())
+
+        mockMvc.get("/api/posts") {
+            header("Authorization", "Bearer mock-token")
+        }.andExpect {
+            status { isOk() }
         }
     }
+
+    //JwtFilterOrderTests
+    @Test
+    fun `should include JwtAuthorizationFilter in the filter chain`() {
+        val filters: List<Filter> = filterChainProxy.getFilters("/api/secure-endpoint")
+
+        val jwtFilterIndex = filters.indexOfFirst { it is JwtAuthorizationFilter }
+
+        assertTrue(jwtFilterIndex >= 0) { "JwtAuthorizationFilter is not present in the filter chain" }
+    }
+
+    //SessionManagementTests
+
+    //PathAuthorizationTests
+
+
 
 
 

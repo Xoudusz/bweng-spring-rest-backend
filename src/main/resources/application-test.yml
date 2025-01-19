@@ -1,4 +1,12 @@
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger.html
+
 spring:
+  cache:
+    type: none
   datasource:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver
@@ -12,3 +20,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         globally_quoted_identifiers: true
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+

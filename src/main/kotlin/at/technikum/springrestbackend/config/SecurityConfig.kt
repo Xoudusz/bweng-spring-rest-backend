@@ -4,6 +4,7 @@ import at.technikum.springrestbackend.repository.UserRepository
 import at.technikum.springrestbackend.service.JwtUserDetailsService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
@@ -49,11 +50,12 @@ class SecurityConfig {
             .cors{it.configurationSource(corsConfigurationSource())}
             .authorizeHttpRequests {
                 it
-                    .requestMatchers(
-                        "/v3/api-docs/**", "/swagger-ui/**", "/swagger.html", // Allow Swagger paths
-                        "/api/auth/**", "/error",           // Allow authentication endpoints
-                        "/api/users" // Allow user creation so we can get a jwt token (for testing)
-                    ).permitAll()
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger.html") // Swagger paths
+                    .permitAll()
+                    .requestMatchers("/api/auth/**", "/error") // Authentication and error endpoints
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, "/api/users") // Allow only POST for user creation
+                    .permitAll()
                     .anyRequest().fullyAuthenticated() // Secure other endpoints
             }
             .sessionManagement {
