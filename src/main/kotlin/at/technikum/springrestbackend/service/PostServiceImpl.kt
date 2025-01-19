@@ -1,51 +1,95 @@
 package at.technikum.springrestbackend.service
 
 import at.technikum.springrestbackend.dto.PostCreateDTO
+import at.technikum.springrestbackend.dto.PostResponseDTO
 import at.technikum.springrestbackend.dto.PostUpdateDTO
 import at.technikum.springrestbackend.entity.Post
 import at.technikum.springrestbackend.exception.notFound.PostNotFoundException
 import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
+import at.technikum.springrestbackend.repository.FileRepository
 import at.technikum.springrestbackend.repository.PostRepository
 import at.technikum.springrestbackend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.FileNotFoundException
 import java.util.*
 
 @Service
 class PostServiceImpl @Autowired constructor(
     private val postRepository: PostRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val fileRepository: FileRepository
 ) : PostService {
 
     @Transactional
-    override fun createPost(postCreateDTO: PostCreateDTO): Post {
-        val userExists = userRepository.existsById(postCreateDTO.userId)
-        if (!userExists) {
-            throw UserNotFoundException("User with ID ${postCreateDTO.userId} not found")
+    override fun createPost(postCreateDTO: PostCreateDTO, username: String): PostResponseDTO {
+        val user = userRepository.findByUsername(username)
+            ?: throw UserNotFoundException("User with username $username not found")
+
+        val file = postCreateDTO.fileId?.let { fileId ->
+            fileRepository.findById(fileId)
+                .orElseThrow { FileNotFoundException("File with ID $fileId not found") }
         }
+
         val post = Post(
-            userId = postCreateDTO.userId,
-            content = postCreateDTO.content
+            user = user,
+            content = postCreateDTO.content,
+            file = file
         )
-        return postRepository.save(post)
+
+        val savedPost = postRepository.save(post)
+        return PostResponseDTO(
+            id = savedPost.id,
+            content = savedPost.content,
+            username = savedPost.user.username,
+            createdAt = savedPost.createdAt,
+            file = savedPost.file,
+            profilePicture = savedPost.user.profilePicture
+        )
     }
 
-    override fun getPostById(id: UUID): Post {
-        return postRepository.findById(id).orElseThrow {
+    override fun getPostById(id: UUID): PostResponseDTO {
+        val post = postRepository.findById(id).orElseThrow {
             PostNotFoundException("Post with ID $id not found")
         }
+        return PostResponseDTO(
+            id = post.id,
+            content = post.content,
+            username = post.user.username,
+            createdAt = post.createdAt,
+            file = post.file,
+            profilePicture = post.user.profilePicture
+        )
     }
 
-    override fun getAllPosts(): List<Post> {
-        return postRepository.findAll()
+    override fun getAllPosts(): List<PostResponseDTO> {
+        return postRepository.findAll().map { post ->
+            PostResponseDTO(
+                id = post.id,
+                content = post.content,
+                username = post.user.username,
+                createdAt = post.createdAt,
+                file = post.file,
+                profilePicture = post.user.profilePicture
+            )
+        }
     }
 
-    override fun updatePost(id: UUID, postUpdateDTO: PostUpdateDTO): Post {
+    override fun updatePost(id: UUID, postUpdateDTO: PostUpdateDTO): PostResponseDTO {
         val existingPost = postRepository.findById(id).orElseThrow {
             PostNotFoundException("Post with ID $id not found")
         }
-        return existingPost.copy(content = postUpdateDTO.content).also { postRepository.save(it) }
+        val updatedPost = existingPost.copy(content = postUpdateDTO.content)
+        postRepository.save(updatedPost)
+        return PostResponseDTO(
+            id = updatedPost.id,
+            content = updatedPost.content,
+            username = updatedPost.user.username,
+            createdAt = updatedPost.createdAt,
+            file = updatedPost.file,
+            profilePicture = updatedPost.user.profilePicture
+        )
     }
 
     @Transactional
@@ -56,11 +100,20 @@ class PostServiceImpl @Autowired constructor(
         postRepository.deleteById(id)
     }
 
-    override fun getPostsByUser(userId: UUID): List<Post> {
+    override fun getPostsByUser(userId: UUID): List<PostResponseDTO> {
         val userExists = userRepository.existsById(userId)
         if (!userExists) {
             throw UserNotFoundException("User with ID $userId not found")
         }
-        return postRepository.findByUserId(userId)
+        return postRepository.findByUserId(userId).map { post ->
+            PostResponseDTO(
+                id = post.id,
+                content = post.content,
+                username = post.user.username,
+                createdAt = post.createdAt,
+                file = post.file,
+                profilePicture = post.user.profilePicture
+            )
+        }
     }
 }

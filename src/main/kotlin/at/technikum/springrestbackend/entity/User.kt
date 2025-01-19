@@ -26,5 +26,9 @@ data class User(
 
     val country: String,
 
-    val createdAt: LocalDateTime = LocalDateTime.now()
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_picture_id")
+    val profilePicture: File? = null
 )

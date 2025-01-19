@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile
 data class FileUploadResponse(val uuid: String, val message: String)
 
 @RestController
-@RequestMapping("/files")
+@RequestMapping("/api/files")
 class FileController(
     private val fileService: FileService
 ) {
