@@ -3,7 +3,6 @@ package at.technikum.springrestbackend.entity
 
 import jakarta.persistence.*
 import java.time.Instant
-import java.util.UUID
 
 @Entity
 @Table(name = "files")
