@@ -8,7 +8,7 @@ import java.util.*
 
 @Service
 interface PostService {
-    fun createPost(postCreateDTO: PostCreateDTO): Post
+    fun createPost(postCreateDTO: PostCreateDTO, username: String): Post
     fun getPostById(id: UUID): Post?
     fun getAllPosts(): List<Post>
     fun updatePost(id: UUID, postUpdateDTO: PostUpdateDTO): Post?

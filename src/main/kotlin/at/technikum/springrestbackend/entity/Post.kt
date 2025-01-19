@@ -10,11 +10,16 @@ data class Post(
     @GeneratedValue(strategy = GenerationType.AUTO)
     var id: UUID = UUID.randomUUID(),
 
-    @JoinColumn(name = "user_Id", nullable = false)
-    val userId: UUID,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    val user: User,
 
     @Column(length = 500)
     val content: String,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "file_id")
+    val file: File? = null,
 
     val createdAt: LocalDateTime = LocalDateTime.now()
 )

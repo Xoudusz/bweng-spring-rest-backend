@@ -5,31 +5,42 @@ import at.technikum.springrestbackend.dto.PostUpdateDTO
 import at.technikum.springrestbackend.entity.Post
 import at.technikum.springrestbackend.exception.notFound.PostNotFoundException
 import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
+import at.technikum.springrestbackend.repository.FileRepository
 import at.technikum.springrestbackend.repository.PostRepository
 import at.technikum.springrestbackend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.FileNotFoundException
 import java.util.*
+
 
 @Service
 class PostServiceImpl @Autowired constructor(
     private val postRepository: PostRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val fileRepository: FileRepository
 ) : PostService {
 
     @Transactional
-    override fun createPost(postCreateDTO: PostCreateDTO): Post {
-        val userExists = userRepository.existsById(postCreateDTO.userId)
-        if (!userExists) {
-            throw UserNotFoundException("User with ID ${postCreateDTO.userId} not found")
+    override fun createPost(postCreateDTO: PostCreateDTO, username: String): Post {
+        val user = userRepository.findByUsername(username)
+            ?: throw UserNotFoundException("User with username $username not found")
+
+        val file = postCreateDTO.fileId?.let { fileId ->
+            fileRepository.findById(fileId)
+                .orElseThrow { FileNotFoundException("File with ID $fileId not found") }
         }
+
         val post = Post(
-            userId = postCreateDTO.userId,
-            content = postCreateDTO.content
+            user = user,
+            content = postCreateDTO.content,
+            file = file
         )
+
         return postRepository.save(post)
     }
+
 
     override fun getPostById(id: UUID): Post {
         return postRepository.findById(id).orElseThrow {

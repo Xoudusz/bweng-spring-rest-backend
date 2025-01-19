@@ -7,9 +7,9 @@ import at.technikum.springrestbackend.service.PostServiceImpl
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 import java.util.*
-
 
 @RestController
 @RequestMapping("/api/posts")
@@ -25,7 +25,14 @@ class PostController(
 
     @PostMapping
     fun createPost(@RequestBody @Valid postCreateDTO: PostCreateDTO): ResponseEntity<Post> {
-        return ResponseEntity(postServiceImpl.createPost(postCreateDTO), HttpStatus.CREATED)
+        // Retrieve the authenticated user's username from the security context
+        val authentication = SecurityContextHolder.getContext().authentication
+        val username = authentication.name // This should correspond to "sub" in JWT payload
+
+        // Pass the username to the service so it can be saved as the uploader
+
+
+        return ResponseEntity(postServiceImpl.createPost(postCreateDTO, username), HttpStatus.CREATED)
     }
 
     @GetMapping
