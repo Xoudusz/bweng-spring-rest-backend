@@ -1,8 +1,8 @@
 package at.technikum.springrestbackend.controller
 
 import at.technikum.springrestbackend.dto.PostCreateDTO
+import at.technikum.springrestbackend.dto.PostResponseDTO
 import at.technikum.springrestbackend.dto.PostUpdateDTO
-import at.technikum.springrestbackend.entity.Post
 import at.technikum.springrestbackend.service.PostServiceImpl
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
@@ -18,37 +18,32 @@ class PostController(
 ) {
 
     @GetMapping("/{id}")
-    fun getPostById(@PathVariable id: UUID): ResponseEntity<Post> {
+    fun getPostById(@PathVariable id: UUID): ResponseEntity<PostResponseDTO> {
         val post = postServiceImpl.getPostById(id)
         return ResponseEntity(post, HttpStatus.OK)
     }
 
     @PostMapping
-    fun createPost(@RequestBody @Valid postCreateDTO: PostCreateDTO): ResponseEntity<Post> {
-        // Retrieve the authenticated user's username from the security context
+    fun createPost(@RequestBody @Valid postCreateDTO: PostCreateDTO): ResponseEntity<PostResponseDTO> {
         val authentication = SecurityContextHolder.getContext().authentication
-        val username = authentication.name // This should correspond to "sub" in JWT payload
-
-        // Pass the username to the service so it can be saved as the uploader
-
-
+        val username = authentication.name
         return ResponseEntity(postServiceImpl.createPost(postCreateDTO, username), HttpStatus.CREATED)
     }
 
     @GetMapping
-    fun getAllPosts(): ResponseEntity<List<Post>> {
+    fun getAllPosts(): ResponseEntity<List<PostResponseDTO>> {
         val posts = postServiceImpl.getAllPosts()
         return ResponseEntity(posts, HttpStatus.OK)
     }
 
     @GetMapping("/user/{userId}")
-    fun getPostsByUser(@PathVariable userId: UUID): ResponseEntity<List<Post>> {
+    fun getPostsByUser(@PathVariable userId: UUID): ResponseEntity<List<PostResponseDTO>> {
         val posts = postServiceImpl.getPostsByUser(userId)
         return ResponseEntity(posts, HttpStatus.OK)
     }
 
     @PutMapping("/{id}")
-    fun updatePost(@PathVariable id: UUID, @RequestBody @Valid postUpdateDTO: PostUpdateDTO): ResponseEntity<Post> {
+    fun updatePost(@PathVariable id: UUID, @RequestBody @Valid postUpdateDTO: PostUpdateDTO): ResponseEntity<PostResponseDTO> {
         val updatedPost = postServiceImpl.updatePost(id, postUpdateDTO)
         return ResponseEntity(updatedPost, HttpStatus.OK)
     }
