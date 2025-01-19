@@ -53,18 +53,26 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {
 		exclude(group = "org.junit.vintage", module = "junit-vintage-engine")
 	}
-//	testImplementation("org.springframework.security:spring-security-test")
-	testImplementation("org.mockito:mockito-core:4.11.0")
-	testImplementation("org.testcontainers:junit-jupiter:1.18.0")
-	testImplementation("org.testcontainers:mysql:1.18.0")
+	testImplementation("org.mockito:mockito-core")
+	testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+	testImplementation("com.h2database:h2") // Add H2 for embedded testing
+	testImplementation("org.springframework.security:spring-security-test")
+//	testImplementation("org.mockito:mockito-core:4.11.0")
+//	testImplementation("org.testcontainers:junit-jupiter:1.18.0")
+//	testImplementation("org.testcontainers:mysql:1.18.0")
+
 
 	// Kotlin specific dependencies
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("io.github.microutils:kotlin-logging:3.0.5")
+	implementation("org.jetbrains.kotlin:kotlin-noarg") // Optional, for JPA entities
+	implementation("org.jetbrains.kotlin:kotlin-allopen") // Makes JPA entities open
 
 	// ISO 3166 country codes
 	implementation("com.neovisionaries:nv-i18n:1.29")
+	testImplementation(kotlin("test"))
 }
 
 kotlin {
