@@ -23,100 +23,95 @@ class JwtAuthorizationFilterTest {
     private lateinit var filterChain: FilterChain
     private lateinit var request: HttpServletRequest
     private lateinit var response: HttpServletResponse
+    private lateinit var userDetails: UserDetails
 
     @BeforeEach
     fun setUp() {
         userDetailsService = mock(UserDetailsService::class.java)
         tokenService = mock(TokenService::class.java)
-        jwtAuthorizationFilter = JwtAuthorizationFilter(userDetailsService, tokenService)
-        filterChain = mock(FilterChain::class.java)
         request = mock(HttpServletRequest::class.java)
         response = mock(HttpServletResponse::class.java)
+        filterChain = mock(FilterChain::class.java)
+        userDetails = mock(UserDetails::class.java)
+
+        jwtAuthorizationFilter = JwtAuthorizationFilter(userDetailsService, tokenService)
+
         SecurityContextHolder.clearContext()
     }
 
     @Test
-    fun `should authenticate user when valid token is provided`() {
-        // Arrange
-        val token = "valid-token"
-        val username = "testuser"
-        val userDetails: UserDetails = User(username, "password", listOf())
+    fun `should skip filter when authorization header is missing`() {
+        `when`(request.getHeader("Authorization")).thenReturn(null)
+
+        jwtAuthorizationFilter.doFilterInternal(request, response, filterChain)
+
+        verify(filterChain).doFilter(request, response)
+        verifyNoInteractions(tokenService, userDetailsService)
+    }
+
+    @Test
+    fun `should skip filter when authorization header does not start with Bearer`() {
+        `when`(request.getHeader("Authorization")).thenReturn("InvalidHeader")
+
+        jwtAuthorizationFilter.doFilterInternal(request, response, filterChain)
+
+        verify(filterChain).doFilter(request, response)
+        verifyNoInteractions(tokenService, userDetailsService)
+    }
+
+    @Test
+    fun `should set authentication for valid token`() {
+        val token = "validToken"
+        val username = "user"
+        val authorities = listOf(mock(org.springframework.security.core.GrantedAuthority::class.java))
+
         `when`(request.getHeader("Authorization")).thenReturn("Bearer $token")
         `when`(tokenService.extractUsername(token)).thenReturn(username)
         `when`(userDetailsService.loadUserByUsername(username)).thenReturn(userDetails)
+        `when`(userDetails.username).thenReturn(username)
+        `when`(userDetails.authorities).thenReturn(authorities)
 
-        // Act
         jwtAuthorizationFilter.doFilterInternal(request, response, filterChain)
 
-        // Assert
-        val auth = SecurityContextHolder.getContext().authentication
-        assertNotNull(auth, "Authentication should be set in the SecurityContext")
-        assertEquals(username, auth.name, "Authenticated username should match the token's username")
+        val authentication = SecurityContextHolder.getContext().authentication as UsernamePasswordAuthenticationToken
+        assert(authentication.name == username)
+        assert(authentication.authorities == authorities)
+
         verify(filterChain).doFilter(request, response)
     }
 
     @Test
-    fun `should skip authentication when no Authorization header is provided`() {
-        // Arrange
-        `when`(request.getHeader("Authorization")).thenReturn(null)
-
-        // Act
-        jwtAuthorizationFilter.doFilterInternal(request, response, filterChain)
-
-        // Assert
-        assertNull(SecurityContextHolder.getContext().authentication, "Authentication should not be set")
-        verify(filterChain).doFilter(request, response)
-    }
-
-    @Test
-    fun `should skip authentication when Authorization header does not start with Bearer`() {
-        // Arrange
-        `when`(request.getHeader("Authorization")).thenReturn("InvalidTokenFormat")
-
-        // Act
-        jwtAuthorizationFilter.doFilterInternal(request, response, filterChain)
-
-        // Assert
-        assertNull(SecurityContextHolder.getContext().authentication, "Authentication should not be set")
-        verify(filterChain).doFilter(request, response)
-    }
-
-    @Test
-    fun `should return unauthorized error when token is invalid`() {
-        // Arrange
-        val invalidToken = "invalid-token"
-        `when`(request.getHeader("Authorization")).thenReturn("Bearer $invalidToken")
-        `when`(tokenService.extractUsername(invalidToken)).thenThrow(RuntimeException("Invalid token"))
-
-        val writer = mock(PrintWriter::class.java)
-        `when`(response.writer).thenReturn(writer)
-
-        // Act
-        jwtAuthorizationFilter.doFilterInternal(request, response, filterChain)
-
-        // Assert
-        verify(response).status = HttpServletResponse.SC_UNAUTHORIZED
-        verify(response).contentType = "application/json"
-        verify(writer).write("""{"error": "Filter Authorization error: Invalid token"}""")
-        verifyNoInteractions(filterChain)
-    }
-
-
-    @Test
-    fun `should not overwrite existing authentication`() {
-        // Arrange
-        val token = "valid-token"
-        val existingAuth = UsernamePasswordAuthenticationToken("existingUser", null, emptyList())
-        SecurityContextHolder.getContext().authentication = existingAuth
+    fun `should return unauthorized status when token service throws exception`() {
+        val token = "invalidToken"
+        val printWriter = mock(PrintWriter::class.java) // Mock the PrintWriter
 
         `when`(request.getHeader("Authorization")).thenReturn("Bearer $token")
+        `when`(tokenService.extractUsername(token)).thenThrow(RuntimeException("Invalid token"))
+        `when`(response.writer).thenReturn(printWriter) // Mock response.getWriter()
 
-        // Act
         jwtAuthorizationFilter.doFilterInternal(request, response, filterChain)
 
-        // Assert
-        assertEquals(existingAuth, SecurityContextHolder.getContext().authentication, "Existing authentication should not be overwritten")
+        verify(response).status = HttpServletResponse.SC_UNAUTHORIZED
+        verify(response).contentType = "application/json"
+        verify(printWriter).write("""{"error": "Filter Authorization error: Invalid token"}""") // Verify the write call
+        verifyNoInteractions(userDetailsService)
+        verifyNoMoreInteractions(filterChain)
+    }
+
+    @Test
+    fun `should skip authentication if already set`() {
+        val token = "validToken"
+        val username = "user"
+
+        `when`(request.getHeader("Authorization")).thenReturn("Bearer $token")
+        `when`(tokenService.extractUsername(token)).thenReturn(username)
+        SecurityContextHolder.getContext().authentication = UsernamePasswordAuthenticationToken("existingUser", null)
+
+        jwtAuthorizationFilter.doFilterInternal(request, response, filterChain)
+
+        verifyNoInteractions(userDetailsService)
         verify(filterChain).doFilter(request, response)
     }
+
 
 }
