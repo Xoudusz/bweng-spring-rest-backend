@@ -15,8 +15,11 @@ class AuthController(
     @PostMapping
     fun authenticate(
         @RequestBody authRequest: AuthenticationRequest
-    ): AuthenticationResponse =
-        authenticationService.authentication(authRequest)
+    ): AuthenticationResponse {
+        println("AuthController.authenticate called with: $authRequest")
+        return authenticationService.authentication(authRequest)
+    }
+
 
     @PostMapping("/refresh")
     fun refreshAccessToken(
