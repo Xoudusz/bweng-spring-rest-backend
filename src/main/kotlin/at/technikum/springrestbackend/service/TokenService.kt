@@ -17,8 +17,9 @@ class TokenService(
             return SecretKeySpec(keyBytes, 0, keyBytes.size, "HmacSHA256")
         }
 
-    fun generateToken(subject: String, role: String, expiration: Date, additionalClaims: Map<String, Any> = emptyMap()): String {
+    fun generateToken(subject: String, userId: String, role: String, expiration: Date, additionalClaims: Map<String, Any> = emptyMap()): String {
         val claims = additionalClaims.toMutableMap()
+        claims["userId"] = userId // Add the userId to the claims map
         claims["role"] = role // Add the role to the claims map
 
         return Jwts.builder()
@@ -30,14 +31,16 @@ class TokenService(
             .compact()
     }
 
-
-
     fun extractUsername(token: String): String {
         return extractAllClaims(token).subject
     }
 
     fun extractRole(token: String): String? {
         return extractAllClaims(token)["role"] as? String
+    }
+
+    fun extractUserId(token: String): String? {
+        return extractAllClaims(token)["userId"] as? String
     }
 
     fun extractAllClaims(token: String): Claims {

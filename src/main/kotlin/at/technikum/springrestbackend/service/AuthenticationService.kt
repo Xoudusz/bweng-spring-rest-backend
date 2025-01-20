@@ -47,8 +47,8 @@ class AuthenticationService(
 
         val user = userDetailsService.loadUserByUsername(foundUser.username)
 
-        val accessToken = createAccessToken(user, foundUser.role.toString())
-        val refreshToken = createRefreshToken(user, foundUser.role.toString())
+        val accessToken = createAccessToken(user, foundUser.id.toString(), foundUser.role.toString())
+        val refreshToken = createRefreshToken(user, foundUser.id.toString(), foundUser.role.toString())
 
         refreshTokenRepository.save(refreshToken, user)
 
@@ -61,6 +61,9 @@ class AuthenticationService(
     fun refreshAccessToken(refreshToken: String): String {
         val username = tokenService.extractUsername(refreshToken)
 
+        val userId = tokenService.extractUserId(refreshToken)
+            ?: throw AuthenticationServiceException("UserID not found in the refresh token")
+
         val role = tokenService.extractRole(refreshToken)
             ?: throw AuthenticationServiceException("Role not found in the refresh token")
 
@@ -69,7 +72,7 @@ class AuthenticationService(
             val refreshTokenUserDetails = refreshTokenRepository.findUserDetailsByToken(refreshToken)
 
             if (currentUserDetails.username == refreshTokenUserDetails?.username)
-                createAccessToken(currentUserDetails, role)
+                createAccessToken(currentUserDetails, userId, role)
             else
                 throw AuthenticationServiceException("Invalid refresh token")
         }
@@ -104,18 +107,20 @@ class AuthenticationService(
     }
 
 
-    private fun createAccessToken(user: UserDetails, role: String): String {
+    private fun createAccessToken(user: UserDetails, userId: String, role: String): String {
         return tokenService.generateToken(
             subject = user.username,
             expiration = Date(System.currentTimeMillis() + accessTokenExpiration),
+            userId = userId,
             role = role
         )
     }
 
 
-    private fun createRefreshToken(user: UserDetails, role: String) = tokenService.generateToken(
+    private fun createRefreshToken(user: UserDetails, userId: String, role: String) = tokenService.generateToken(
         subject = user.username,
         expiration = Date(System.currentTimeMillis() + refreshTokenExpiration),
+        userId = userId,
         role = role
     )
 
