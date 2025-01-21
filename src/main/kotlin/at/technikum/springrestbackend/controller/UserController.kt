@@ -1,5 +1,6 @@
 package at.technikum.springrestbackend.controller
 
+import at.technikum.springrestbackend.dto.UpdateUserDTO
 import at.technikum.springrestbackend.dto.UserDTO
 import at.technikum.springrestbackend.entity.User
 import at.technikum.springrestbackend.service.UserService
@@ -33,7 +34,7 @@ class UserController(private val userService: UserService) {
     }
 
     @PutMapping("/{id}")
-    fun updateUser(@PathVariable id: UUID, @Valid @RequestBody userDTO: UserDTO): ResponseEntity<User> {
+    fun updateUser(@PathVariable id: UUID, @Valid @RequestBody userDTO: UpdateUserDTO): ResponseEntity<User> {
         val updatedUser = userService.updateUser(id, userDTO)
         return ResponseEntity(updatedUser, HttpStatus.OK)
     }
