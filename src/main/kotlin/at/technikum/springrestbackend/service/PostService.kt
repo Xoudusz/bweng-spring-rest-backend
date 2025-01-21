@@ -10,6 +10,7 @@ import java.util.*
 interface PostService {
     fun createPost(postCreateDTO: PostCreateDTO, username: String): PostResponseDTO
     fun getPostById(id: UUID): PostResponseDTO
+    fun getPostByUsername(username: String): List<PostResponseDTO>
     fun getAllPosts(): List<PostResponseDTO>
     fun updatePost(id: UUID, postUpdateDTO: PostUpdateDTO): PostResponseDTO
     fun deletePost(id: UUID)

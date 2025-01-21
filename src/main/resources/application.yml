@@ -7,7 +7,7 @@ springdoc:
 jwt:
   secret: averygoodsecretnoonewilleverguessinamillionyears
   accessTokenExpiration: 600000
-  refreshTokenExpiration: 3600000
+  refreshTokenExpiration: 43200000
 
 spring:
   application:

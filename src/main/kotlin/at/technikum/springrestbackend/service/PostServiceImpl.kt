@@ -63,6 +63,19 @@ class PostServiceImpl @Autowired constructor(
         )
     }
 
+    override fun getPostByUsername(username: String): List<PostResponseDTO> {
+        return  postRepository.findByUserUsername(username).map { post ->
+            PostResponseDTO(
+                id = post.id,
+                content = post.content,
+                username = post.user.username,
+                createdAt = post.createdAt,
+                file = post.file,
+                profilePicture = post.user.profilePicture
+            )
+        }
+    }
+
     override fun getAllPosts(): List<PostResponseDTO> {
         return postRepository.findAll().map { post ->
             PostResponseDTO(

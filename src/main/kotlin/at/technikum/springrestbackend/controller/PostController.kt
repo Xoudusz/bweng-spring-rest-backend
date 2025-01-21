@@ -42,6 +42,12 @@ class PostController(
         return ResponseEntity(posts, HttpStatus.OK)
     }
 
+    @GetMapping("/user/username/{username}")
+    fun getPostByUserUsername(@PathVariable username: String): ResponseEntity<List<PostResponseDTO>> {
+        val posts = postServiceImpl.getPostByUsername(username)
+        return ResponseEntity(posts, HttpStatus.OK)
+    }
+
     @PutMapping("/{id}")
     fun updatePost(@PathVariable id: UUID, @RequestBody @Valid postUpdateDTO: PostUpdateDTO): ResponseEntity<PostResponseDTO> {
         val updatedPost = postServiceImpl.updatePost(id, postUpdateDTO)
