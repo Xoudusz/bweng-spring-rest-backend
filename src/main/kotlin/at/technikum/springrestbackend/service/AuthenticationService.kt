@@ -79,15 +79,7 @@ class AuthenticationService(
     }
 
     fun isTokenValid(token: String): Boolean {
-        return try {
-            // Try to extract the claims and check the expiration date
-            val claims = tokenService.extractAllClaims(token)
-            val expiration = claims.expiration
-            Date().before(expiration) // Returns true if the token is not expired
-        } catch (e: Exception) {
-            // If any exception occurs (e.g., token is invalid, signature mismatch), return false
-            false
-        }
+        return tokenService.isTokenValid(token)
     }
 
     // New method to logout (invalidate the refresh token)

@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource
 import org.springframework.stereotype.Component
@@ -17,22 +16,34 @@ class JwtAuthorizationFilter(
     private val userDetailsService: UserDetailsService,
     private val tokenService: TokenService
 ) : OncePerRequestFilter() {
-    public override fun doFilterInternal(
+
+    override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
     ) {
         val authorizationHeader: String? = request.getHeader("Authorization")
 
-        if (null != authorizationHeader && authorizationHeader.startsWith("Bearer ")) {
+        // If Authorization header is missing, skip filtering
+        if (authorizationHeader.isNullOrBlank()) {
+            logger.info("No Authorization header found, skipping JWT filter")
+            filterChain.doFilter(request, response)
+            return
+        }
+
+        // Proceed only if the Authorization header starts with "Bearer "
+        if (authorizationHeader.startsWith("Bearer ")) {
+            val token = authorizationHeader.substringAfter("Bearer ")
+
             try {
-                val token: String = authorizationHeader.substringAfter("Bearer ")
-                val username: String = tokenService.extractUsername(token)
+                val username = tokenService.extractUsername(token)
 
+                // Only authenticate if the SecurityContext has no authentication
                 if (SecurityContextHolder.getContext().authentication == null) {
-                    val userDetails: UserDetails = userDetailsService.loadUserByUsername(username)
+                    val userDetails = userDetailsService.loadUserByUsername(username)
 
-                    if (username == userDetails.username) {
+                    // Ensure the token is valid
+                    if (tokenService.isTokenValid(token)) {
                         val authToken = UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.authorities
                         )
@@ -41,15 +52,12 @@ class JwtAuthorizationFilter(
                     }
                 }
             } catch (ex: Exception) {
-                response.status = HttpServletResponse.SC_UNAUTHORIZED
-                response.contentType = "application/json"
-                response.writer.write(
-                    """{"error": "Filter Authorization error: ${ex.message ?: "unknown error"}"}"""
-                )
-                return // Prevent further processing
+                // Log the error and skip modifying the response status
+                logger.warn("JWT validation failed: ${ex.message}")
             }
         }
 
+        // Continue the filter chain
         filterChain.doFilter(request, response)
     }
 }

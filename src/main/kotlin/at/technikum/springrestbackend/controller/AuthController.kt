@@ -28,9 +28,8 @@ class AuthController(
 
     @GetMapping("/check")
     fun checkTokenValidity(
-        @RequestHeader("Authorization") authorizationHeader: String
+        @RequestParam("token") token: String
     ): Boolean {
-        val token = authorizationHeader.removePrefix("Bearer ").trim()
         return authenticationService.isTokenValid(token)
     }
 

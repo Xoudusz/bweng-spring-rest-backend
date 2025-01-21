@@ -31,6 +31,18 @@ class TokenService(
             .compact()
     }
 
+    fun isTokenValid(token: String): Boolean {
+        return try {
+            // Try to extract the claims and check the expiration date
+            val claims = extractAllClaims(token)
+            val expiration = claims.expiration
+            Date().before(expiration) // Returns true if the token is not expired
+        } catch (e: Exception) {
+            // If any exception occurs (e.g., token is invalid, signature mismatch), return false
+            false
+        }
+    }
+
     fun extractUsername(token: String): String {
         return extractAllClaims(token).subject
     }
