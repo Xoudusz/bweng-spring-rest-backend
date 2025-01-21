@@ -17,7 +17,7 @@ class JwtAuthorizationFilter(
     private val userDetailsService: UserDetailsService,
     private val tokenService: TokenService
 ) : OncePerRequestFilter() {
-    override fun doFilterInternal(
+    public override fun doFilterInternal(
         request: HttpServletRequest,
         response: HttpServletResponse,
         filterChain: FilterChain
