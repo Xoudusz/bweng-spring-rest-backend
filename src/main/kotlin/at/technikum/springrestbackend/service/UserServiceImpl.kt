@@ -1,19 +1,23 @@
 package at.technikum.springrestbackend.service
 
+import at.technikum.springrestbackend.dto.UpdateUserDTO
 import at.technikum.springrestbackend.dto.UserDTO
 import at.technikum.springrestbackend.entity.User
 import at.technikum.springrestbackend.exception.notFound.UserNotFoundException
+import at.technikum.springrestbackend.repository.FileRepository
 import at.technikum.springrestbackend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.io.FileNotFoundException
 import java.util.*
 
 @Service
 class UserServiceImpl @Autowired constructor(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder
+    private val passwordEncoder: PasswordEncoder,
+    private val fileRepository: FileRepository
 ) : UserService {
 
     @Transactional
@@ -48,18 +52,27 @@ class UserServiceImpl @Autowired constructor(
     }
 
     @Transactional
-    override fun updateUser(id: UUID, userDTO: UserDTO): User {
+    override fun updateUser(id: UUID, userDTO: UpdateUserDTO): User {
         val existingUser = userRepository.findById(id).orElseThrow {
             UserNotFoundException("User with ID $id not found")
         }
-        return existingUser.copy(
+
+        val file = userDTO.fileId?.let { fileId ->
+            fileRepository.findById(fileId)
+                .orElseThrow { FileNotFoundException("File with ID $fileId not found") }
+        }
+
+        val updatedUser = existingUser.copy(
             username = userDTO.username,
             email = userDTO.email,
-            password = passwordEncoder.encode(userDTO.password),
+            password = userDTO.password?.let { passwordEncoder.encode(it) } ?: existingUser.password,
             role = userDTO.role,
             country = userDTO.country,
-            salutation = userDTO.salutation
-        ).also { userRepository.save(it) }
+            salutation = userDTO.salutation,
+            profilePicture = file
+        )
+
+        return userRepository.save(updatedUser)
     }
 
     @Transactional
