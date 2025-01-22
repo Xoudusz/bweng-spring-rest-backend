@@ -1,44 +1,83 @@
 # Backend Web Engineering Project
 
 ## Description
-This is a Spring Boot project that uses MariaDB as database and MinIO as storage. The project is a simple REST API that allows to manage users and their files. It is the backend for a social media platform.
 
-## Requirements
-* Docker
-    * [Get Docker](https://docs.docker.com/get-docker/)
+This is a Spring Boot project that uses MariaDB as the database and MinIO as the storage solution. The project provides a REST API to manage users and their files, serving as the backend for a social media platform.
 
-## Container
-* Spring Boot basic setup container
-    * Port 8080
-* MariaDB container
-    * Port 3306
-* MinIO container
-    * Port 9000
-    * Port 9001 (Dashboard)
+## 🗃️ Requirements
 
-## Component Diagram
-![App Componenet Diagram](http://www.plantuml.com/plantuml/png/POxDIiL038NtUOfmz_SDHAwttRWGmJx1E1DhS9eCcTID-EwMbj8VTydv3dpdLZsOZqE6J1-EhcZSVpecDehEAW0XkXescKaSG3GHjXg_oF074ACEHML2UEcAiVHuLtLyAkKoytsZKN7JdCbEe2FxvaZr5BzHqSgknZFw1K1CmSDxg8GlmJYqzsF6ylmAKmzWsOiFr-lZthkTCzhCwx741_Fsh7Xr_oVBWXj96eVy1m00)
+Ensure the following tools are installed:
 
-## Already installed dependecies
-* springdoc-openapi
-    * /api (API json)
-    * /swagger.html (Swagger API UI)
+- **Docker**: To run the application containers
+  - [Get Docker](https://www.docker.com/)
 
-## Setup
-Build Docker container
-```shell
+## 📦 Containers
+
+The project consists of the following containers:
+
+1. **Spring Boot Backend**
+   - Port: `8080`
+
+2. **MariaDB**
+   - Port: `3306`
+
+3. **MinIO**
+   - API Port: `9000`
+   - Dashboard Port: `9001`
+
+## ⚙️ Already Installed Dependencies
+
+- **SpringDoc OpenAPI**:
+  - API JSON: `/api`
+  - Swagger UI: `/swagger.html`
+
+## 🚀 Setup
+
+### Build Docker Containers
+
+Build the application containers:
+
+```bash
 docker compose build
 ```
-Start Docker container (with build)
-```shell
+
+### Start Docker Containers
+
+Start the containers (with build):
+
+```bash
 docker compose up
+```
+
+Alternatively, start the containers and rebuild them:
+
+```bash
 docker compose up --build
 ```
-Stop Docker container
-```shell
+
+### Stop Docker Containers
+
+Stop the running containers:
+
+```bash
 docker compose stop
 ```
-Remove Docker container
-```shell
+
+### Remove Docker Containers
+
+Completely remove the containers:
+
+```bash
 docker compose down
 ```
+
+## 📋 Component Diagram
+
+![Component Diagram](App_Component_Diagram.png)
+
+### 💡 Additional Notes
+
+This project uses:
+- **MariaDB** for relational database management.
+- **MinIO** for object storage.
+- **SpringDoc OpenAPI** for interactive API documentation, accessible at `/swagger.html`.
