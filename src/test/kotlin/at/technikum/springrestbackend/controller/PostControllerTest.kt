@@ -1,9 +1,8 @@
 package at.technikum.springrestbackend.controller
 
-import at.technikum.springrestbackend.controller.PostController
 import at.technikum.springrestbackend.dto.PostCreateDTO
+import at.technikum.springrestbackend.dto.PostResponseDTO
 import at.technikum.springrestbackend.dto.PostUpdateDTO
-import at.technikum.springrestbackend.entity.Post
 import at.technikum.springrestbackend.service.PostServiceImpl
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -12,6 +11,9 @@ import org.mockito.Mock
 import org.mockito.Mockito.*
 import org.mockito.MockitoAnnotations
 import org.springframework.http.HttpStatus
+import org.springframework.security.core.Authentication
+import org.springframework.security.core.context.SecurityContext
+import org.springframework.security.core.context.SecurityContextHolder
 import java.time.LocalDateTime
 import java.util.*
 import kotlin.test.assertEquals
@@ -27,6 +29,15 @@ class PostControllerTest {
     @BeforeEach
     fun setUp() {
         MockitoAnnotations.openMocks(this)
+        postServiceImpl = mock(PostServiceImpl::class.java)
+        postController = PostController(postServiceImpl)
+
+        // Mock SecurityContext
+        val authentication = mock(Authentication::class.java)
+        `when`(authentication.name).thenReturn("user") // Set the authenticated user's name
+        val securityContext = mock(SecurityContext::class.java)
+        `when`(securityContext.authentication).thenReturn(authentication)
+        SecurityContextHolder.setContext(securityContext)
     }
 
     //getPostByIdTests
@@ -34,15 +45,15 @@ class PostControllerTest {
     fun `should retrieve post by ID and return OK status`() {
         // Arrange
         val postId = UUID.randomUUID()
-        val post = Post(postId, UUID.randomUUID(), "Content", LocalDateTime.now())
-        `when`(postServiceImpl.getPostById(postId)).thenReturn(post)
+        val postResponseDTO = PostResponseDTO(postId, "Content", "user", LocalDateTime.now(), null, null)
+        `when`(postServiceImpl.getPostById(postId)).thenReturn(postResponseDTO)
 
         // Act
         val response = postController.getPostById(postId)
 
         // Assert
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(post, response.body)
+        assertEquals(postResponseDTO, response.body)
         verify(postServiceImpl, times(1)).getPostById(postId)
     }
 
@@ -50,46 +61,50 @@ class PostControllerTest {
     @Test
     fun `should create post and return CREATED status`() {
         // Arrange
-        val postCreateDTO = PostCreateDTO("Content", UUID.randomUUID())
-        val createdPost = Post(UUID.randomUUID(), UUID.randomUUID(), "Content", LocalDateTime.now())
-        `when`(postServiceImpl.createPost(postCreateDTO)).thenReturn(createdPost)
+        val postCreateDTO = PostCreateDTO("Content", null)
+        val postResponseDTO = PostResponseDTO(
+            id = UUID.randomUUID(),
+            content = "Content",
+            username = "user",
+            createdAt = LocalDateTime.now(),
+            file = null,
+            profilePicture = null
+        )
+        `when`(postServiceImpl.createPost(postCreateDTO, "user")).thenReturn(postResponseDTO)
 
         // Act
         val response = postController.createPost(postCreateDTO)
 
         // Assert
         assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(createdPost, response.body)
-        verify(postServiceImpl, times(1)).createPost(postCreateDTO)
+        assertEquals(postResponseDTO, response.body)
+        verify(postServiceImpl, times(1)).createPost(postCreateDTO, "user")
     }
+
 
     //getAllPostsTests
     @Test
     fun `should retrieve all posts and return OK status`() {
-        // Arrange
-        val posts = listOf(
-            Post(UUID.randomUUID(), UUID.randomUUID(), "Content1", LocalDateTime.now()),
-            Post(UUID.randomUUID(), UUID.randomUUID(), "Content2", LocalDateTime.now())
+        val responseDTOs = listOf(
+            PostResponseDTO(UUID.randomUUID(), "Content1", "user1", LocalDateTime.now(), null, null),
+            PostResponseDTO(UUID.randomUUID(), "Content2", "user2", LocalDateTime.now(), null, null)
         )
-        `when`(postServiceImpl.getAllPosts()).thenReturn(posts)
+        `when`(postServiceImpl.getAllPosts()).thenReturn(responseDTOs)
 
-        // Act
         val response = postController.getAllPosts()
 
-        // Assert
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(posts, response.body)
+        assertEquals(responseDTOs, response.body)
         verify(postServiceImpl, times(1)).getAllPosts()
     }
-
     //getPostsByUserTests
     @Test
     fun `should retrieve posts by user ID and return OK status`() {
         // Arrange
         val userId = UUID.randomUUID()
         val posts = listOf(
-            Post(UUID.randomUUID(), UUID.randomUUID(), "Content1", LocalDateTime.now()),
-            Post(UUID.randomUUID(), UUID.randomUUID(), "Content2", LocalDateTime.now())
+            PostResponseDTO(UUID.randomUUID(), "Content1", "user1", LocalDateTime.now(),null ,null),
+            PostResponseDTO(UUID.randomUUID(), "Content2", "user2", LocalDateTime.now(),null, null)
         )
         `when`(postServiceImpl.getPostsByUser(userId)).thenReturn(posts)
 
@@ -102,24 +117,22 @@ class PostControllerTest {
         verify(postServiceImpl, times(1)).getPostsByUser(userId)
     }
 
+
     //updatePostTests
     @Test
     fun `should update post and return OK status`() {
-        // Arrange
         val postId = UUID.randomUUID()
-        val postUpdateDTO = PostUpdateDTO("Content")
-        val updatedPost = Post(postId, UUID.randomUUID(), "Content2", LocalDateTime.now())
-        `when`(postServiceImpl.updatePost(postId, postUpdateDTO)).thenReturn(updatedPost)
+        val postUpdateDTO = PostUpdateDTO("Updated Content")
+        val postResponseDTO = PostResponseDTO(postId, "Updated Content", "user", LocalDateTime.now(), null, null
+        )
+        `when`(postServiceImpl.updatePost(postId, postUpdateDTO)).thenReturn(postResponseDTO)
 
-        // Act
         val response = postController.updatePost(postId, postUpdateDTO)
 
-        // Assert
         assertEquals(HttpStatus.OK, response.statusCode)
-        assertEquals(updatedPost, response.body)
+        assertEquals(postResponseDTO, response.body)
         verify(postServiceImpl, times(1)).updatePost(postId, postUpdateDTO)
     }
-
     //deletePostTests
     @Test
     fun `should delete post and return NO_CONTENT status`() {
@@ -135,3 +148,4 @@ class PostControllerTest {
     }
 
 }
+

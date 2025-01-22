@@ -1,12 +1,8 @@
 package at.technikum.springrestbackend.service
 
 import at.technikum.springrestbackend.entity.AuthenticationRequest
-import at.technikum.springrestbackend.entity.AuthenticationResponse
 import at.technikum.springrestbackend.entity.enums.Role
 import at.technikum.springrestbackend.repository.RefreshTokenRepository
-import at.technikum.springrestbackend.service.AuthenticationService
-import at.technikum.springrestbackend.service.TokenService
-import at.technikum.springrestbackend.service.UserService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mock
@@ -16,12 +12,8 @@ import org.mockito.MockitoAnnotations
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.userdetails.User
-import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
-import org.springframework.security.authentication.AuthenticationServiceException
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 import java.util.*
 
 class AuthenticationServiceTest {
@@ -74,7 +66,7 @@ class AuthenticationServiceTest {
             )
         ).thenReturn(null)
         `when`(userDetailsService.loadUserByUsername(foundUser.username)).thenReturn(userDetails)
-        `when`(tokenService.generateToken(anyString(), anyString(), any(Date::class.java))).thenReturn(accessToken, refreshToken)
+        `when`(tokenService.generateToken(anyString(), anyString(), anyString(), any(Date::class.java), anyMap())).thenReturn(accessToken, refreshToken)
 
         // Act
         val response = authenticationService.authentication(authRequest)
