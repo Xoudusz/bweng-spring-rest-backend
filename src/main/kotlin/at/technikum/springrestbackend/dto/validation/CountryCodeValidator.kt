@@ -7,9 +7,12 @@ import jakarta.validation.ConstraintValidatorContext
 
 class CountryCodeValidator : ConstraintValidator<ValidCountryCode, String> {
 
-
     override fun isValid(value: String?, context: ConstraintValidatorContext): Boolean {
-        if (value.isNullOrBlank()) {
+        // Allow null values (validation passes if the field is null)
+        if (value == null) return true
+
+        // Check if the value is blank
+        if (value.isBlank()) {
             return false
         }
 

@@ -30,5 +30,7 @@ data class User(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "profile_picture_id")
-    val profilePicture: File? = null
+    val profilePicture: File? = null,
+
+    val locked: Boolean = false
 )

@@ -63,13 +63,14 @@ class UserServiceImpl @Autowired constructor(
         }
 
         val updatedUser = existingUser.copy(
-            username = userDTO.username,
-            email = userDTO.email,
+            username = userDTO.username ?: existingUser.username,
+            email = userDTO.email ?: existingUser.email,
             password = userDTO.password?.let { passwordEncoder.encode(it) } ?: existingUser.password,
-            role = userDTO.role,
-            country = userDTO.country,
-            salutation = userDTO.salutation,
-            profilePicture = file
+            role = userDTO.role ?: existingUser.role,
+            country = userDTO.country ?: existingUser.country,
+            salutation = userDTO.salutation ?: existingUser.salutation,
+            profilePicture = file,
+            locked = userDTO.locked ?: existingUser.locked
         )
 
         return userRepository.save(updatedUser)

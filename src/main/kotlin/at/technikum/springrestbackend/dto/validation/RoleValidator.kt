@@ -6,6 +6,10 @@ import jakarta.validation.ConstraintValidatorContext
 
 class RoleValidator : ConstraintValidator<ValidRole, Role> {
     override fun isValid(value: Role?, context: ConstraintValidatorContext): Boolean {
-        return value != null && Role.entries.toTypedArray().contains(value)
+        // Allow null values (validation passes if the field is null)
+        if (value == null) return true
+
+        // Validate non-null values
+        return Role.entries.contains(value)
     }
 }
