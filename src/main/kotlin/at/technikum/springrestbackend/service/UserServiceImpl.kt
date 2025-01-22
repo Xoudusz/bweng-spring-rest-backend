@@ -69,7 +69,7 @@ class UserServiceImpl @Autowired constructor(
             role = userDTO.role ?: existingUser.role,
             country = userDTO.country ?: existingUser.country,
             salutation = userDTO.salutation ?: existingUser.salutation,
-            profilePicture = file,
+            profilePicture = file ?: existingUser.profilePicture,
             locked = userDTO.locked ?: existingUser.locked
         )
 

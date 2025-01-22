@@ -5,6 +5,7 @@ import at.technikum.springrestbackend.entity.AuthenticationResponse
 import at.technikum.springrestbackend.entity.RefreshTokenRequest
 import at.technikum.springrestbackend.entity.TokenResponse
 import at.technikum.springrestbackend.service.AuthenticationService
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -17,6 +18,8 @@ class AuthController(
         @RequestBody authRequest: AuthenticationRequest
     ): AuthenticationResponse {
         println("AuthController.authenticate called with: $authRequest")
+        val authentication = SecurityContextHolder.getContext().authentication
+        println("Authentication: $authentication")
         return authenticationService.authentication(authRequest)
     }
 
