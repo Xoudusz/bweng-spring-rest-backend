@@ -1,6 +1,7 @@
 package at.technikum.springrestbackend.controller
 
 import at.technikum.springrestbackend.controller.UserController
+import at.technikum.springrestbackend.dto.UpdateUserDTO
 import at.technikum.springrestbackend.dto.UserDTO
 import at.technikum.springrestbackend.entity.User
 import at.technikum.springrestbackend.entity.enums.Role
@@ -86,7 +87,7 @@ class UserControllerTest {
     fun `should update user and return OK status`() {
         // Arrange
         val userId = UUID.randomUUID()
-        val userDTO = UserDTO("John", "Doe", "johndoe@example.com", Role.USER, "Mr", "AUT")
+        val userDTO = UpdateUserDTO("John", "Doe", "johndoe@example.com", Role.USER, "Mr", "AUT")
         val updatedUser = User(userId, "John", "Doe", "johndoe@example.com", Role.USER, "Mr", "AUT")
         `when`(userService.updateUser(userId, userDTO)).thenReturn(updatedUser)
 
