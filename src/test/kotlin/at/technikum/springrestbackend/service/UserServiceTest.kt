@@ -36,7 +36,7 @@ class UserServiceTest {
         val userDTO = UserDTO(
             username = "john_doe",
             email = "john.doe@example.com",
-            password = "Strong@123",
+            password = "Strong@123456", // 12 characters
             role = Role.USER,
             salutation = "Mr.",
             country = "US"
@@ -55,7 +55,7 @@ class UserServiceTest {
         whenever(userRepository.findByUsername(userDTO.username)).thenReturn(null)
         whenever(userRepository.findByEmail(userDTO.email)).thenReturn(null)
         whenever(passwordEncoder.encode(userDTO.password)).thenReturn(encodedPassword)
-        whenever(userRepository.save(any())).thenReturn(savedUser) // Correct stubbing here
+        whenever(userRepository.save(any<User>())).thenReturn(savedUser) // Specify type in any()
 
         // Act
         val result = userService.createUser(userDTO)
@@ -67,8 +67,9 @@ class UserServiceTest {
         verify(userRepository).findByUsername(userDTO.username)
         verify(userRepository).findByEmail(userDTO.email)
         verify(passwordEncoder).encode(userDTO.password)
-        verify(userRepository).save(any())
+        verify(userRepository).save(any<User>()) // Specify type in verify
     }
+
 
     @Test
     fun `createUser should throw IllegalArgumentException when username already exists`() {
@@ -193,11 +194,12 @@ class UserServiceTest {
 
     @Test
     fun `updateUser should update and return an existing user`() {
+        // Arrange
         val id = UUID.randomUUID()
         val updateUserDTO = UpdateUserDTO(
             username = "john_doe_updated",
             email = "john.doe.updated@example.com",
-            password = "Updated@123",
+            password = "Updated@123456",
             role = Role.ADMIN,
             salutation = "Dr.",
             country = "GB"
@@ -221,23 +223,24 @@ class UserServiceTest {
         )
         val savedUpdatedUser = updatedUser.copy(id = id)
 
-
         whenever(userRepository.findById(id)).thenReturn(Optional.of(existingUser))
         whenever(passwordEncoder.encode(updateUserDTO.password)).thenReturn("updated_encoded_password")
-        whenever(userRepository.save(any())).thenReturn(savedUpdatedUser)
+        whenever(userRepository.save(any<User>())).thenReturn(savedUpdatedUser) // Specify type in any()
 
+        // Act
         val result = userService.updateUser(id, updateUserDTO)
 
+        // Assert
         assertEquals(updateUserDTO.username, result.username)
         assertEquals(updateUserDTO.email, result.email)
         assertEquals(updateUserDTO.role, result.role)
         assertEquals(updateUserDTO.salutation, result.salutation)
         assertEquals(updateUserDTO.country, result.country)
-
+        assertEquals("updated_encoded_password", result.password)
 
         verify(userRepository).findById(id)
         verify(passwordEncoder).encode(updateUserDTO.password)
-        verify(userRepository).save(any())
+        verify(userRepository).save(any<User>()) // Specify type in verify
     }
 
     @Test

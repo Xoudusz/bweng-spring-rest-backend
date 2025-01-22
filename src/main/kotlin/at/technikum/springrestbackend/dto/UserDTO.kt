@@ -20,9 +20,9 @@ data class UserDTO(
     val email: String,
 
     @field:NotBlank(message = "Password is required")
-    @field:Size(min = 12, message = "Password must be at least 8 characters")
+    @field:Size(min = 12, message = "Password must be at least 12 characters")
     @field:Pattern(
-        regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}",
+        regexp = "(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{12,}",
         message = "Password must contain at least one uppercase letter, one lowercase letter, one digit, and one special character"
     )
     val password: String,
