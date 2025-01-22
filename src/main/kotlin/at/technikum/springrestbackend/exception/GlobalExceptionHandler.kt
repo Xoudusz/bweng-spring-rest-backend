@@ -146,5 +146,18 @@ class GlobalExceptionHandler {
         return ResponseEntity(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(UserLockedException::class)
+    fun handleUserLockedException(
+        ex: UserLockedException,
+        request: HttpServletRequest
+    ): ResponseEntity<ErrorResponse> {
+        val response = ErrorResponse(
+            status = HttpStatus.FORBIDDEN.value(),
+            error = HttpStatus.FORBIDDEN.reasonPhrase,
+            message = ex.message ?: "User account is locked.",
+            path = request.requestURI
+        )
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response)
+    }
 
 }

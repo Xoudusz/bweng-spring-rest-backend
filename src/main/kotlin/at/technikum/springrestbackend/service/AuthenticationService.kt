@@ -2,6 +2,7 @@ package at.technikum.springrestbackend.service
 
 import at.technikum.springrestbackend.entity.AuthenticationRequest
 import at.technikum.springrestbackend.entity.AuthenticationResponse
+import at.technikum.springrestbackend.exception.UserLockedException
 import at.technikum.springrestbackend.repository.RefreshTokenRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.authentication.AuthenticationManager
@@ -36,6 +37,11 @@ class AuthenticationService(
 
         if (foundUser == null) {
             throw AuthenticationServiceException("User with identifier ${authenticationRequest.identifier} not found")
+        }
+
+        // Check if the user account is locked
+        if (foundUser.locked) {
+            throw UserLockedException("User account is locked. Please contact support.")
         }
 
         authManager.authenticate(
