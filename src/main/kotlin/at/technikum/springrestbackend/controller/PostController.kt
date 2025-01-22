@@ -54,7 +54,7 @@ class PostController(
         return ResponseEntity(posts, HttpStatus.OK)
     }
 
-    @PreAuthorize("#id == authentication.principal.id or hasAuthority('ADMIN')")
+    @PreAuthorize("hasPermission(#id, 'PUT')")
     @PutMapping("/{id}")
     fun updatePost(@PathVariable id: UUID, @RequestBody @Valid postUpdateDTO: PostUpdateDTO): ResponseEntity<PostResponseDTO> {
         val updatedPost = postServiceImpl.updatePost(id, postUpdateDTO)
