@@ -3,7 +3,6 @@ package at.technikum.springrestbackend.controller
 import at.technikum.springrestbackend.dto.CommentCreateDTO
 import at.technikum.springrestbackend.entity.Comment
 import at.technikum.springrestbackend.service.CommentServiceImpl
-import at.technikum.springrestbackend.service.LikeServiceImpl
 import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,7 +14,7 @@ import java.util.*
 class CommentController(private val commentServiceImpl: CommentServiceImpl) {
 
     @GetMapping
-    fun getAllPosts(): ResponseEntity<List<Comment>> {
+    fun getAllComments(): ResponseEntity<List<Comment>> {
         val comments = commentServiceImpl.getAllComments()
         return ResponseEntity(comments, HttpStatus.OK)
     }
